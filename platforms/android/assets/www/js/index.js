@@ -24,39 +24,33 @@ var app = {
     },
     
     bindCordovaEvents: function() {
-        document.addEventListener('bcready', app.onBCReady, false);
-		document.addEventListener('deviceconnected', app.onDeviceConnected, false);
-		document.addEventListener('devicedisconnected', app.onBluetoothDisconnect, false);
-		document.addEventListener('newdevice', app.addNewDevice, false);
-		document.addEventListener('bluetoothstatechange', app.onBluetoothStateChange, false);
-		document.addEventListener('onsubscribestatechange', app.onSubscribeStateChange, false);
-		document.addEventListener('oncharacteristicread', app.onCharacteristicRead, false);
-		document.addEventListener('oncharacteristicwrite', app.onCharacteristicWrite, false);
-		document.addEventListener('ondescriptorread', app.onDescriptorRead, false);
-		document.addEventListener('ondescriptorwrite', app.onDescriptorWrite, false);
-		document.addEventListener('newibeacon', app.onNewIBeacon, false);
-		document.addEventListener('ibeaconproximityupdate', app.onIBeaconProximityUpdate, false);
-		document.addEventListener('ibeaconaccuracyupdate', app.onIBeaconAccuracyUpdate, false);
+		//To support v0.2.1, future event should be object oriented.
+        document.addEventListener('ibeaconready', app.onReady, false);
     },
     
-	onNewIBeacon : function(arg){
-		var ibeacon = BC.bluetooth.ibeacons[arg.iBeaconID];
-		alert("New beacon found : " + JSON.stringify(ibeacon));
+	onNewIBeacon : function(s){
+		var newibeacon = s.target;
+		newibeacon.addEventListener("ibeaconproximityupdate",app.onIBeaconProximityUpdate);
+		newibeacon.addEventListener("ibeaconaccuracyupdate",app.onIBeaconAccuracyUpdate);
 	},
 	
-	onIBeaconProximityUpdate : function(arg){
-		var ibeacon = BC.bluetooth.ibeacons[arg.iBeaconID];
-		alert("iBeacon proximity: " + ibeacon.proximity);
+	onIBeaconProximityUpdate : function(theibeacon){
+		alert("iBeacon proximity: " + theibeacon.proximity);
 	},
 	
-	onIBeaconAccuracyUpdate : function(arg){
-		var ibeacon = BC.bluetooth.ibeacons[arg.iBeaconID];
-		//alert("iBeacon accuracy: " + ibeacon.accuracy);
+	onIBeaconAccuracyUpdate : function(theibeacon){
+		//alert("iBeacon accuracy: " + theibeacon.accuracy);
 	},
 	
 	onDeviceConnected : function(arg){
 		var deviceAddress = arg.deviceAddress;
+		alert(arg.deviceAddress +" is connected");
 		//alert("device:"+deviceAddress+" is connected!");
+	},
+	
+	onDeviceDisconnected: function(arg){
+		alert("device:"+arg.deviceAddress+" is disconnected!");
+		$.mobile.changePage("index.html","slideup");
 	},
 	
     bindUIEvents: function(){
@@ -85,14 +79,17 @@ var app = {
 	startORstopIBeaconScan: function(){
 		var state = $("#scanIBeaconOnOff").val();
 		if(state == 1){
-			//BC.Bluetooth.StartIBeaconScan("e2c56db5-dffb-48d2-b060-d0f5a71096e0");
-			BC.Bluetooth.StartIBeaconScan("00000000-0000-0000-0000-000000000000");
+			BC.IBeaconManager.StartIBeaconScan("e2c56db5-dffb-48d2-b060-d0f5a71096e0");
+			//BC.IBeaconManager.StartIBeaconScan("00000000-0000-0000-0000-000000000000");
 		}else if(state == 0){
-			BC.Bluetooth.StopIBeaconScan();
+			BC.IBeaconManager.StopIBeaconScan();
 		}
     },
     
-    onBCReady: function() {
+    onReady: function() {
+		BC.bluetooth.addEventListener("bluetoothstatechange",app.onBluetoothStateChange);
+		BC.bluetooth.addEventListener("newdevice",app.addNewDevice);
+		BC.iBeaconManager.addEventListener("newibeacon",app.onNewIBeacon);
 		if(!BC.bluetooth.isopen){
 			if(API !== "ios"){
 				BC.Bluetooth.OpenBluetooth(function(){
@@ -102,7 +99,7 @@ var app = {
 				alert("Please open your bluetooth first.");
 			}
 		}else{
-			BC.Bluetooth.StartScan();
+			//BC.Bluetooth.StartScan();
 		}
     },
 	
@@ -149,15 +146,14 @@ var app = {
 		alert(JSON.stringify(arg));
 	},
 	
-	ondescriptorwrite : function(arg){
-		alert(JSON.stringify(arg));
-	},
-	
-	addNewDevice: function(arg){
-		var deviceAddress = arg.deviceAddress;
+	addNewDevice: function(s){
+		var newDevice = s.target;
+		newDevice.addEventListener("deviceconnected",app.onDeviceConnected);
+		newDevice.addEventListener("devicedisconnected",app.onDeviceDisconnected);
+		
 		var viewObj	= $("#user_view");
 		var liTplObj=$("#li_tpl").clone();
-		var newDevice = BC.bluetooth.devices[deviceAddress];
+
 		$("a",liTplObj).attr("onclick","app.device_page('"+newDevice.deviceAddress+"')");
 		
 		liTplObj.show();
@@ -171,7 +167,7 @@ var app = {
 				$("[dbField='"+key+"']",liTplObj).html(newDevice[key]);
 			}
 		}	
-			
+
 		viewObj.append(liTplObj);
 		viewObj.listview("refresh");
 	},
@@ -185,11 +181,6 @@ var app = {
 			  "ManufacturerData(ASCII):"+app.device.advertisementData.manufacturerData.getASCIIString()+"\n"+
 			  "ManufacturerData(Unicode):"+app.device.advertisementData.manufacturerData.getUnicodeString());
 		}
-	},
-	
-	onBluetoothDisconnect: function(arg){
-		alert("device:"+arg.deviceAddress+" is disconnected!");
-		$.mobile.changePage("index.html","slideup");
 	},
 	
 	onScanStartSuccess: function(list){
@@ -229,6 +220,8 @@ var app = {
 	connectDevice: function(){
 		app.showLoader("Connecting and discovering services...");
 		app.device.connect(app.connectSuccess,app.connectError);
+		app.device.addEventListener("deviceconnected",function(s){alert("OBJECT EVENT!!! deviceconnected " + s.deviceAddress);});
+		app.device.addEventListener("devicedisconnected",function(s){alert("OBJECT EVENT!!! devicedisconnected " + s.deviceAddress)});
 	},
     connectError: function(){
         app.hideLoader();
@@ -449,8 +442,13 @@ var app = {
 		var onMyWriteRequestName = "myWriteRequest";
 		var onMyReadRequestName = "myReadRequest";
 		var character1 = BC.Bluetooth.CreateCharacteristic("0000ffe1-0000-1000-8000-00805f9b34fb","01","Hex",property,permission);
+		character1.addEventListener("onsubscribestatechange",function(s){alert("OBJECT EVENT!! onsubscribestatechange : (" + s.uuid + ") state:" + s.isSubscribed);});
+		character1.addEventListener("oncharacteristicread",function(s){alert("OBJECT EVENT!! oncharacteristicread : (" + s.uuid + ")");});
+		character1.addEventListener("oncharacteristicwrite",function(s){alert("OBJECT EVENT!! oncharacteristicwrite : (" + s.uuid + ") writeValue:" + s.writeValue.getHexString());});
 		var character2 = BC.Bluetooth.CreateCharacteristic("0000fff2-0000-1000-8000-00805f9b34fb","00","Hex",property,permission);
 		var descriptor1 = BC.Bluetooth.CreateDescriptor("00002901-0000-1000-8000-00805f9b34fb","00","Hex",permission);
+		descriptor1.addEventListener("ondescriptorread",function(s){alert("OBJECT EVENT!! ondescriptorread : " + s.uuid);});
+		descriptor1.addEventListener("ondescriptorwrite",function(s){alert("OBJECT EVENT!! ondescriptorwrite : " + s.uuid);});
 		var descriptor2 = BC.Bluetooth.CreateDescriptor("00002902-0000-1000-8000-00805f9b34fb","08","Hex",permission);
 		character1.addDescriptor(descriptor1);
 		character1.addDescriptor(descriptor2);
@@ -532,7 +530,7 @@ var app = {
 	},
 	
 	startIBeaconAdvertising : function(){
-		BC.Bluetooth.StartIBeaconAdvertising(function(){alert("iBeacon advertising started!");},function(){alert("start iBeacon error!");},
+		BC.IBeaconManager.StartIBeaconAdvertising(function(){alert("iBeacon advertising started!");},function(){alert("start iBeacon error!");},
 			"00000000-0000-0000-0000-000000000000",111,222,""
 		);
 	},

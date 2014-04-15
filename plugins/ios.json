@@ -11,14 +11,23 @@
         },
         "config.xml": {
             "/*": {
-                "<feature name=\"BCBluetooth\"><param name=\"ios-package\" value=\"BCBluetooth\" /></feature>": 1
+                "<feature name=\"BCWifi\"><param name=\"ios-package\" value=\"org.bcsphere.wifi.BCWifi\" /></feature>": 1,
+                "<feature name=\"BCBluetooth\"><param name=\"ios-package\" value=\"BCBluetooth\" /></feature>": 1,
+                "<feature name=\"BCIBeacon\"><param name=\"ios-package\" value=\"org.bcsphere.ibeacon.BCIBeacon\" /></feature>": 1
             }
         }
     },
     "installed_plugins": {
-        "org.bcsphere.bluetooth": {
-            "PACKAGE_NAME": "org.bcsphere.bcsphere-core-dev"
+        "org.bcsphere.wifi": {
+            "PACKAGE_NAME": "com.jumacc.BCJS"
+        },
+        "org.bcsphere.ibeacon": {
+            "PACKAGE_NAME": "com.jumacc.BCJS"
         }
     },
-    "dependent_plugins": {}
+    "dependent_plugins": {
+        "org.bcsphere.bluetooth": {
+            "PACKAGE_NAME": "com.jumacc.BCJS"
+        }
+    }
 }
