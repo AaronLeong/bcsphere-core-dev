@@ -37,7 +37,6 @@ var bluetooth = {
      */
     startScan: function(successFunc,errorFunc,serviceUUIDs) {
         cordova.exec(successFunc,errorFunc, "BCBluetooth", "startScan", serviceUUIDs);
-
     },
     
 	getScanData: function(getDevicesSuccess,getDevicesError){

@@ -25,7 +25,7 @@ var app = {
     
     bindCordovaEvents: function() {
 		//To support v0.2.1, future event should be object oriented.
-        document.addEventListener('ibeaconready', app.onReady, false);
+        document.addEventListener('bcready', app.onBCReady, false);
     },
     
 	onNewIBeacon : function(s){
@@ -86,7 +86,7 @@ var app = {
 		}
     },
     
-    onReady: function() {
+    onBCReady: function() {
 		BC.bluetooth.addEventListener("bluetoothstatechange",app.onBluetoothStateChange);
 		BC.bluetooth.addEventListener("newdevice",app.addNewDevice);
 		BC.iBeaconManager.addEventListener("newibeacon",app.onNewIBeacon);
