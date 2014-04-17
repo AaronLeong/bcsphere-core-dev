@@ -37,6 +37,6 @@
         <param name="ios-package" value="BCBluetooth" />
     </feature>
     <feature name="BCIBeacon">
-        <param name="ios-package" value="org.bcsphere.ibeacon.BCIBeacon" />
+        <param name="ios-package" value="BCIBeacon" />
     </feature>
 </widget>

@@ -13,7 +13,7 @@
             "/*": {
                 "<feature name=\"BCWifi\"><param name=\"ios-package\" value=\"org.bcsphere.wifi.BCWifi\" /></feature>": 1,
                 "<feature name=\"BCBluetooth\"><param name=\"ios-package\" value=\"BCBluetooth\" /></feature>": 1,
-                "<feature name=\"BCIBeacon\"><param name=\"ios-package\" value=\"org.bcsphere.ibeacon.BCIBeacon\" /></feature>": 1
+                "<feature name=\"BCIBeacon\"><param name=\"ios-package\" value=\"BCIBeacon\" /></feature>": 1
             }
         }
     },
