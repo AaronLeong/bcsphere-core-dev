@@ -44,7 +44,7 @@ var app = {
 	
 	onDeviceConnected : function(arg){
 		var deviceAddress = arg.deviceAddress;
-		alert(arg.deviceAddress +" is connected");
+		alert(arg.deviceAddress +" is connected!");
 		//alert("device:"+deviceAddress+" is connected!");
 	},
 	
@@ -435,21 +435,18 @@ var app = {
 	},
 	
 	createService : function(){
-	
-		var service = BC.Bluetooth.CreateService("0000ffe0-0000-1000-8000-00805f9b34fb");
+		var service = new BC.Service({"uuid":"ffe0"});
 		var property = ["read","write","notify"];
 		var permission = ["read","write"];
-		var onMyWriteRequestName = "myWriteRequest";
-		var onMyReadRequestName = "myReadRequest";
-		var character1 = BC.Bluetooth.CreateCharacteristic("0000ffe1-0000-1000-8000-00805f9b34fb","01","Hex",property,permission);
+		var character1 = new BC.Characteristic({uuid:"ffe1",value:"01",type:"Hex",property:property,permission:permission});
 		character1.addEventListener("onsubscribestatechange",function(s){alert("OBJECT EVENT!! onsubscribestatechange : (" + s.uuid + ") state:" + s.isSubscribed);});
 		character1.addEventListener("oncharacteristicread",function(s){alert("OBJECT EVENT!! oncharacteristicread : (" + s.uuid + ")");});
 		character1.addEventListener("oncharacteristicwrite",function(s){alert("OBJECT EVENT!! oncharacteristicwrite : (" + s.uuid + ") writeValue:" + s.writeValue.getHexString());});
-		var character2 = BC.Bluetooth.CreateCharacteristic("0000fff2-0000-1000-8000-00805f9b34fb","00","Hex",property,permission);
-		var descriptor1 = BC.Bluetooth.CreateDescriptor("00002901-0000-1000-8000-00805f9b34fb","00","Hex",permission);
+		var character2 = new BC.Characteristic({uuid:"ffe2",value:"00",type:"Hex",property:property,permission:permission});
+		var descriptor1 = new BC.Descriptor({uuid:"2901",value:"00",type:"Hex",permission:permission});
 		descriptor1.addEventListener("ondescriptorread",function(s){alert("OBJECT EVENT!! ondescriptorread : " + s.uuid);});
 		descriptor1.addEventListener("ondescriptorwrite",function(s){alert("OBJECT EVENT!! ondescriptorwrite : " + s.uuid);});
-		var descriptor2 = BC.Bluetooth.CreateDescriptor("00002902-0000-1000-8000-00805f9b34fb","08","Hex",permission);
+		var descriptor2 = new BC.Descriptor({uuid:"2902",value:"08",type:"Hex",permission:permission});
 		character1.addDescriptor(descriptor1);
 		character1.addDescriptor(descriptor2);
 		service.addCharacteristic(character1);
