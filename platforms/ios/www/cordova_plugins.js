@@ -27,7 +27,7 @@ module.exports.metadata =
 {
     "org.bcsphere.wifi": "0.0.1",
     "org.bcsphere.ibeacon": "0.0.1",
-    "org.bcsphere.bluetooth": "0.2.1"
+    "org.bcsphere.bluetooth": "0.3.0"
 }
 // BOTTOM OF METADATA
 });
