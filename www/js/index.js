@@ -435,7 +435,7 @@ var app = {
 	},
 	
 	createService : function(){
-		var service = new BC.Service({uuid:"ffe0"});
+		var service = new BC.Service({"uuid":"ffe0"});
 		var property = ["read","write","notify"];
 		var permission = ["read","write"];
 		var character1 = new BC.Characteristic({uuid:"ffe1",value:"01",type:"Hex",property:property,permission:permission});
