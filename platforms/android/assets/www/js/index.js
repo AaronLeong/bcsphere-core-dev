@@ -24,7 +24,6 @@ var app = {
     },
     
     bindCordovaEvents: function() {
-		//To support v0.2.1, future event should be object oriented.
         document.addEventListener('bcready', app.onBCReady, false);
     },
     
