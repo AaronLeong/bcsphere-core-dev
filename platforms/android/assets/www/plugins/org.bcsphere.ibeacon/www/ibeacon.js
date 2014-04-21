@@ -36,8 +36,8 @@ var ibeacon = {
 		cordova.exec(callback,errorFunc,"BCIBeacon","startIBeaconAdvertising",[{"proximityUUID":proximityUUID,"major":major,"minor":minor,"identifier":identifier}]);
 	},
 	
-	addEventListener : function(callback,errorFunc,arg){
-		cordova.exec(callback,errorFunc,"BCIBeacon","addEventListener",[{"eventName":arg.eventName,"arg":arg.arg}]);
+	addEventListener : function(eventName,callback,errorFunc){
+		cordova.exec(callback,errorFunc,"BCIBeacon","addEventListener",[{"eventName":eventName}]);
 	},
 };
 module.exports = ibeacon;
