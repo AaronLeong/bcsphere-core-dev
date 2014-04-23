@@ -26,7 +26,7 @@ module.exports.metadata =
 // TOP OF METADATA
 {
     "org.bcsphere.wifi": "0.0.1",
-    "org.bcsphere.ibeacon": "0.0.1",
+    "org.bcsphere.ibeacon": "0.1.0",
     "org.bcsphere.bluetooth": "0.3.0"
 }
 // BOTTOM OF METADATA

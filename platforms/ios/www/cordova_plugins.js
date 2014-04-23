@@ -1,10 +1,10 @@
 cordova.define('cordova/plugin_list', function(require, exports, module) {
 module.exports = [
     {
-        "file": "plugins/org.bcsphere.bluetooth/www/bluetooth.js",
-        "id": "org.bcsphere.bluetooth.bluetooth",
+        "file": "plugins/org.bcsphere.wifi/www/wifi.js",
+        "id": "org.bcsphere.wifi.wifi",
         "merges": [
-            "navigator.bluetooth"
+            "navigator.wifi"
         ]
     },
     {
@@ -15,19 +15,19 @@ module.exports = [
         ]
     },
     {
-        "file": "plugins/org.bcsphere.wifi/www/wifi.js",
-        "id": "org.bcsphere.wifi.wifi",
+        "file": "plugins/org.bcsphere.bluetooth/www/bluetooth.js",
+        "id": "org.bcsphere.bluetooth.bluetooth",
         "merges": [
-            "navigator.wifi"
+            "navigator.bluetooth"
         ]
     }
 ];
 module.exports.metadata = 
 // TOP OF METADATA
 {
-    "org.bcsphere.bluetooth": "0.3.0",
-    "org.bcsphere.ibeacon": "0.0.1",
-    "org.bcsphere.wifi": "0.0.1"
+    "org.bcsphere.wifi": "0.0.1",
+    "org.bcsphere.ibeacon": "0.1.0",
+    "org.bcsphere.bluetooth": "0.3.0"
 }
 // BOTTOM OF METADATA
 });

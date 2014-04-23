@@ -15,6 +15,8 @@
 */
 var serviceUniqueID = "";
 var interval_notify_index = "";
+var interval_scan_index = "";
+var scan_timestamp = 0;
 var app = {
 
     // Application Constructor
@@ -25,6 +27,7 @@ var app = {
     
     bindCordovaEvents: function() {
         document.addEventListener('bcready', app.onBCReady, false);
+		document.addEventListener('adddevice2ui', app.addDevice2UI, false);
     },
     
 	onNewIBeacon : function(s){
@@ -69,11 +72,53 @@ var app = {
     startORstopScan: function(){
 		var state = $("#scanOnOff").val();
 		if(state == 1){
+			$("#user_view").html("");
 			BC.Bluetooth.StartScan();
+			scan_timestamp = new Date().getTime();
+			interval_scan_index = window.setInterval(app.displayScanResult, 1000);
 		}else if(state == 0){
 			BC.Bluetooth.StopScan();
+			if(interval_scan_index){
+				window.clearInterval(interval_scan_index);
+			}
 		}
     },
+	
+	displayScanResult: function(){
+		_.each(BC.bluetooth.devices,function(device){
+			if(scan_timestamp < device.advTimestamp && app.notOnUI(device)){
+				var viewObj	= $("#user_view");
+				var liTplObj=$("#li_tpl").clone();
+				$("a",liTplObj).attr("onclick","app.device_page('"+device.deviceAddress+"')");
+				liTplObj.show();
+				for(var key in device){
+					if(key == "isConnected"){
+						if(device.isConnected){
+							$("[dbField='"+key+"']",liTplObj).html("YES");
+						}
+						$("[dbField='"+key+"']",liTplObj).html("NO");
+					}else{
+						$("[dbField='"+key+"']",liTplObj).html(device[key]);
+					}
+				}	
+
+				viewObj.append(liTplObj);
+				viewObj.listview("refresh");
+			}
+		});
+	},
+	
+	notOnUI: function(device){
+		var length = $("#user_view li").length;
+		for(var i = 0; i < length; i++){
+			var liTplObj = $("#user_view li")[i];
+			var deviceAddr = $("[dbField='deviceAddress']",liTplObj).html();
+			if(deviceAddr == device.deviceAddress){
+				return false;
+			}
+		}
+		return true;
+	},
 	
 	startORstopIBeaconScan: function(){
 		var state = $("#scanIBeaconOnOff").val();
@@ -149,26 +194,6 @@ var app = {
 		var newDevice = s.target;
 		newDevice.addEventListener("deviceconnected",app.onDeviceConnected);
 		newDevice.addEventListener("devicedisconnected",app.onDeviceDisconnected);
-		
-		var viewObj	= $("#user_view");
-		var liTplObj=$("#li_tpl").clone();
-
-		$("a",liTplObj).attr("onclick","app.device_page('"+newDevice.deviceAddress+"')");
-		
-		liTplObj.show();
-		for(var key in newDevice){
-			if(key == "isConnected"){
-				if(newDevice.isConnected){
-					$("[dbField='"+key+"']",liTplObj).html("YES");
-				}
-				$("[dbField='"+key+"']",liTplObj).html("NO");
-			}else{
-				$("[dbField='"+key+"']",liTplObj).html(newDevice[key]);
-			}
-		}	
-
-		viewObj.append(liTplObj);
-		viewObj.listview("refresh");
 	},
 	
 	seeAdvData: function(){

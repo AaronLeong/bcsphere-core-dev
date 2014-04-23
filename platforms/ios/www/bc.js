@@ -72,25 +72,27 @@
 	
 	//wait for plugin ready
 	var time = 0;
-	window.setTimeout(function(){
-		var interval = window.setInterval(function() {
-			var isAllReady = true;
-			for(var plugin in BC.plugins){
-				if(time == 5){
-					window.clearInterval(interval);
-					BC.bluetooth.dispatchEvent("pulginTimeout");
-				}else{
-					if(!plugin.isReady){
-						isAllReady = false;
+	document.addEventListener("bccoreready",function(){
+		window.setTimeout(function(){
+			var interval = window.setInterval(function() {
+				var isAllReady = true;
+				for(var plugin in BC.plugins){
+					if(time == 5){
+						window.clearInterval(interval);
+						BC.bluetooth.dispatchEvent("pulginTimeout");
+					}else{
+						if(!plugin.isReady){
+							isAllReady = false;
+						}
 					}
 				}
-			}
-			time++;
-			if(isAllReady){
-				fireDocumentEvent("bcready");
-			}
-		}, 100);
-	},100);
+				time++;
+				if(isAllReady){
+					BC.Tools.FireDocumentEvent("bcready");
+				}
+			}, 100);
+		},100);
+	});
 	
 	//class extend function
 	var extend = function(protoProps, staticProps) {
@@ -154,13 +156,6 @@
 		return (r.test(this.S+this.join(this.S)+this.S));
 	}
 	
-	function fireDocumentEvent(eventName,arg){
-		var event = document.createEvent('Events');
-		event.arg = arg;
-		event.initEvent(eventName, false, false);
-		document.dispatchEvent(event);
-	}
-	
 	document.addEventListener('deviceready', onDeviceReady, false);
 	
 	function onDeviceReady(){
@@ -181,7 +176,7 @@
 			character.isSubscribed = false;
 			character.dispatchEvent("onsubscribestatechange");
 		});
-		BC.bluetooth.addSystemListener('oncharacteristicread', function(arg){
+		BC.bluetooth.addSystemListener("oncharacteristicread", function(arg){
 			var service = BC.bluetooth.services[arg.uniqueID];
 			var character = service.characteristics[arg.characteristicIndex];
 			character.dispatchEvent("oncharacteristicread");
@@ -193,7 +188,7 @@
 			character.writeValue = dataValue;
 			character.dispatchEvent("oncharacteristicwrite");
 		});
-		BC.bluetooth.addSystemListener('ondescriptorread', function(arg){
+		BC.bluetooth.addSystemListener("ondescriptorread", function(arg){
 			var service = BC.bluetooth.services[arg.uniqueID];
 			var character = service.characteristics[arg.characteristicIndex];
 			var descriptor = character.descriptors[arg.descriptorIndex];
@@ -206,6 +201,45 @@
 			var dataValue = new BC.DataValue(BC.Tools.Base64ToBuffer(arg.writeRequestValue));
 			descriptor.writeValue = dataValue;
 			descriptor.dispatchEvent("ondescriptorwrite");
+		});
+		BC.bluetooth.addSystemListener("newadvpacket",function(scanData){
+			var advertisementData,deviceAddress,deviceName,isCon,RSSI,txPower;
+			if(scanData['advertisementData']){
+				advertisementData = scanData['advertisementData'];
+				if(advertisementData.manufacturerData){
+					advertisementData.manufacturerData = new BC.DataValue(BC.Tools.Base64ToBuffer(advertisementData.manufacturerData));
+				}
+			}
+			if(scanData['deviceAddress']){
+				deviceAddress = scanData['deviceAddress'];
+			}
+			if(scanData['deviceName']){
+				deviceName = scanData['deviceName'];
+			}
+			if(scanData['isConnected']){
+				isCon = scanData['isConnected'];
+			}
+			if(scanData['RSSI']){
+				RSSI = parseInt(scanData['RSSI']);
+			}
+			
+			var isConnected = false;
+			if(isCon === "true"){
+				isConnected = true;
+			}
+			if(isNewDevice(deviceAddress)){
+				var newdevice = new BC.Device({deviceAddress:deviceAddress,deviceName:deviceName,advertisementData:advertisementData,isConnected:isConnected,RSSI:RSSI});
+				BC.bluetooth.devices[deviceAddress] = newdevice;
+				BC.bluetooth.dispatchEvent("newdevice",newdevice);
+			}else{
+				var thedevice = BC.bluetooth.devices[deviceAddress];
+				thedevice.RSSI = RSSI;
+				//IOS will regard the different advertisement data which broadcast from same bluetooth address as different device
+				//so be careful if you want to develop application based on changing advertisement data
+				thedevice.advertisementData = advertisementData;	
+				thedevice.advTimestamp = new Date().getTime();
+			}
+			
 		});
 
 		document.addEventListener("bluetoothclose",function(){
@@ -232,7 +266,7 @@
 				}else{
 					BC.bluetooth.isopen = true;
 				}
-				fireDocumentEvent("bccoreready");
+				BC.Tools.FireDocumentEvent("bccoreready");
 			},testFunc);
 		},function(mes){alert(JSON.stringify(mes));});
 	}
@@ -315,6 +349,13 @@
 		return uuid_128;
 	}
 	
+	var FireDocumentEvent = BC.Tools.FireDocumentEvent = function(eventName,arg){
+		var event = document.createEvent('Events');
+		event.arg = arg;
+		event.initEvent(eventName, false, false);
+		document.dispatchEvent(event);
+	}
+	
 	var EventDispatcher = BC.EventDispatcher = function(){
 		var s = this;
 		s._eventList = new Array();
@@ -382,16 +423,14 @@
 				navigator.bluetooth.getEnvironment(success,error);
 			};
 		
-			this.startScan = function(processDevices,UUIDs){
+			this.startScan = function(UUIDs){
 				var uuids;
 				if(typeof UUIDs !== 'undefined'){
 					uuids = [{"serviceUUIDs":UUIDs}];;
 				}else{
 					uuids = [{"serviceUUIDs":[]}];
 				}
-				navigator.bluetooth.startScan(function(){
-					navigator.bluetooth.getScanData(processDevices,testFunc);
-				},testFunc,uuids);
+				navigator.bluetooth.startScan(null,testFunc,uuids);
 			};
 		
 			this.stopScan = function(){
@@ -674,45 +713,9 @@
 	 * @fires Bluetooth#newdevice
 	 */
 	var StartScan = BC.Bluetooth.StartScan = function(uuids){
-		BC.bluetooth.startScan(onGetDevicesSuccess,uuids);
+		BC.bluetooth.startScan(uuids);
 	};
 	
-	function onGetDevicesSuccess(data){
-		for(var i=0; i<data.length; i++){
-			var advertisementData,deviceAddress,deviceName,isCon,RSSI,txPower;
-			if(data[i]['advertisementData']){
-				advertisementData = data[i]['advertisementData'];
-				if(advertisementData.manufacturerData){
-					advertisementData.manufacturerData = new BC.DataValue(BC.Tools.Base64ToBuffer(advertisementData.manufacturerData));
-				}
-			}
-			if(data[i]['deviceAddress']){
-				deviceAddress = data[i]['deviceAddress'];
-			}
-			if(data[i]['deviceName']){
-				deviceName = data[i]['deviceName'];
-			}
-			if(data[i]['isConnected']){
-				isCon = data[i]['isConnected'];
-			}
-			if(data[i]['RSSI']){
-				RSSI = parseInt(data[i]['RSSI']);
-			}
-			
-			var isConnected = false;
-			if(isCon === "true"){
-				isConnected = true;
-			}
-			if(isNewDevice(deviceAddress)){
-				var newdevice = new BC.Device({deviceAddress:deviceAddress,deviceName:deviceName,advertisementData:advertisementData,isConnected:isConnected,RSSI:RSSI});
-				BC.bluetooth.devices[deviceAddress] = newdevice;
-				BC.bluetooth.dispatchEvent("newdevice",newdevice);
-			}else{
-				//update the RSSI
-				BC.bluetooth.devices[deviceAddress].RSSI = RSSI;
-			}
-		}
-	};
 	function isNewDevice(deviceAddress){
 		var res = true;
 		_.each(BC.bluetooth.devices,function(device){
@@ -974,6 +977,7 @@
 			this.softwareRevision = null;
 			this.manufacturerName = null;
 			this.RSSI = arg.RSSI;
+			this.advTimestamp = new Date().getTime();
 			if(!BC.Tools.IsEmpty(this.deviceInitialize)){
 				this.deviceInitialize.apply(this, arguments);
 			}
@@ -1365,7 +1369,7 @@
 		getCharacteristicByUUID : function(uuid){
 			var uuid = uuid.toLowerCase();
 			var result = [];
-			var uuid_128 = BC.Tools.ChangeTo128UUID(arg.uuid);
+			var uuid_128 = BC.Tools.ChangeTo128UUID(uuid);
 			_.each(this.characteristics, function(characteristic){
 				if(characteristic.uuid == uuid_128){
 						result.push(characteristic);

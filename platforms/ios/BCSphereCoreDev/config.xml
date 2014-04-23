@@ -30,13 +30,13 @@
     <access origin="*" />
     <preference name="fullscreen" value="true" />
     <preference name="webviewbounce" value="true" />
+    <feature name="BCWifi">
+        <param name="ios-package" value="org.bcsphere.wifi.BCWifi" />
+    </feature>
     <feature name="BCBluetooth">
         <param name="ios-package" value="BCBluetooth" />
     </feature>
     <feature name="BCIBeacon">
         <param name="ios-package" value="BCIBeacon" />
-    </feature>
-    <feature name="BCWifi">
-        <param name="ios-package" value="org.bcsphere.wifi.BCWifi" />
     </feature>
 </widget>
