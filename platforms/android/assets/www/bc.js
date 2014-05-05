@@ -1557,7 +1557,9 @@
 			data.characteristicIndex = obj.characteristicIndex;
 			data.date = obj.date;
 			data.deviceAddress = obj.deviceAddress;
-			this.callback(data);
+			alert(JSON.stringify(data));
+			BC.bluetooth.devices[data.deviceAddress].services[data.serviceIndex].characteristics[data.characteristicIndex].callback(data);
+			//this.callback(data);
 		},
 		
 		/**

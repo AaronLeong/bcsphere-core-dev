@@ -207,6 +207,15 @@ var app = {
 		}
 	},
 	
+	notify2 : function(){
+		var device = BC.bluetooth.devices[app.device.deviceAddress];
+		var serviceIndex = sessionStorage.getItem("serviceIndex");
+		var service = app.device.services[serviceIndex];
+		service.characteristics[3].subscribe(function(){alert("3");});
+		alert("222222");
+		service.characteristics[6].subscribe(function(){alert("6");});
+	},
+	
 	onScanStartSuccess: function(list){
 		//alert(list);
 	},	
