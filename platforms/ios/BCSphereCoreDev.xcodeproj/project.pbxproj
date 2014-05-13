@@ -5,7 +5,6 @@
 	};
 	objectVersion = 46;
 	objects = {
-
 /* Begin PBXBuildFile section */
 		1D3623260D0F684500981E51 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* AppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
@@ -29,9 +28,6 @@
 		5AEE5B35173C68D80009041E /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AEE5B34173C68D80009041E /* CoreLocation.framework */; };
 		5B1594DD16A7569C00FEF299 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B1594DC16A7569C00FEF299 /* AssetsLibrary.framework */; };
 		71347C341904BE4D0003A7C2 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 71347C331904BE4D0003A7C2 /* SystemConfiguration.framework */; };
-		713C41BB1907964800C53BCB /* BCBluetooth.m in Sources */ = {isa = PBXBuildFile; fileRef = 713C41BA1907964800C53BCB /* BCBluetooth.m */; };
-		713C41BE1907964F00C53BCB /* BCIBeacon.m in Sources */ = {isa = PBXBuildFile; fileRef = 713C41BD1907964F00C53BCB /* BCIBeacon.m */; };
-		713C41C019079F2A00C53BCB /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 71347C311904BE450003A7C2 /* CoreBluetooth.framework */; };
 		7E7966DE1810823500FA85AD /* icon-40.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966D41810823500FA85AD /* icon-40.png */; };
 		7E7966DF1810823500FA85AD /* icon-40@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966D51810823500FA85AD /* icon-40@2x.png */; };
 		7E7966E01810823500FA85AD /* icon-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966D61810823500FA85AD /* icon-50.png */; };
@@ -44,6 +40,8 @@
 		7E7966E71810823500FA85AD /* icon-small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966DD1810823500FA85AD /* icon-small@2x.png */; };
 		B41141DB546C45BFBC7AE6CC /* BCWifi.m in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B541FDE649D18A7C113A /* BCWifi.m */; };
 		D4A0D8761607E02300AEF8BB /* Default-568h@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = D4A0D8751607E02300AEF8BB /* Default-568h@2x~iphone.png */; };
+		61B6EBC87A3C422D9D4701B2 /* BCBluetooth.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C766C01A9BE436083BC0AF4 /* BCBluetooth.m */; };
+		CA6B0DF4B7804857B3969F17 /* BCIBeacon.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C3E8182D35340B190731E28 /* BCIBeacon.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -116,6 +114,10 @@
 		EB87FDF31871DA8E0020F90C /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = www; path = ../../www; sourceTree = "<group>"; };
 		EB87FDF41871DAF40020F90C /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = ../../config.xml; sourceTree = "<group>"; };
 		F840E1F0165FE0F500CFE078 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = BCSphereCoreDev/config.xml; sourceTree = "<group>"; };
+		1C766C01A9BE436083BC0AF4 /* BCBluetooth.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "BCBluetooth.m"; path = "Plugins\org.bcsphere.bluetooth\BCBluetooth.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		BE7C35CCEA144513B0B519AC /* BCBluetooth.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "BCBluetooth.h"; path = "Plugins\org.bcsphere.bluetooth\BCBluetooth.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		3C3E8182D35340B190731E28 /* BCIBeacon.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "BCIBeacon.m"; path = "Plugins\org.bcsphere.ibeacon\BCIBeacon.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		73408DC138DC4E5ABB13E6E9 /* BCIBeacon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "BCIBeacon.h"; path = "Plugins\org.bcsphere.ibeacon\BCIBeacon.h"; sourceTree = "<group>"; fileEncoding = 4; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,7 +125,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				713C41C019079F2A00C53BCB /* CoreBluetooth.framework in Frameworks */,
 				71347C341904BE4D0003A7C2 /* SystemConfiguration.framework in Frameworks */,
 				5B1594DD16A7569C00FEF299 /* AssetsLibrary.framework in Frameworks */,
 				301BF552109A68D80062928A /* libCordova.a in Frameworks */,
@@ -246,6 +247,10 @@
 				713C41BA1907964800C53BCB /* BCBluetooth.m */,
 				EAF7B541FDE649D18A7C113A /* BCWifi.m */,
 				409C5C29900B4E6FB791723E /* BCWifi.h */,
+				1C766C01A9BE436083BC0AF4 /* BCBluetooth.m */,
+				BE7C35CCEA144513B0B519AC /* BCBluetooth.h */,
+				3C3E8182D35340B190731E28 /* BCIBeacon.m */,
+				73408DC138DC4E5ABB13E6E9 /* BCIBeacon.h */,
 			);
 			name = Plugins;
 			path = BCSphereCoreDev/Plugins;
@@ -438,11 +443,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
-				713C41BB1907964800C53BCB /* BCBluetooth.m in Sources */,
-				713C41BE1907964F00C53BCB /* BCIBeacon.m in Sources */,
 				1D3623260D0F684500981E51 /* AppDelegate.m in Sources */,
 				302D95F114D2391D003F00A1 /* MainViewController.m in Sources */,
 				B41141DB546C45BFBC7AE6CC /* BCWifi.m in Sources */,
+				61B6EBC87A3C422D9D4701B2 /* BCBluetooth.m in Sources */,
+				CA6B0DF4B7804857B3969F17 /* BCIBeacon.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

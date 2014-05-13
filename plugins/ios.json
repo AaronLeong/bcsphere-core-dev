@@ -7,7 +7,9 @@
         "framework": {
             "CoreBluetooth.framework": {
                 "true": 2
-            }
+            },
+            "AssetsLibrary.framework": {},
+            "MobileCoreServices.framework": {}
         },
         "config.xml": {
             "/*": {

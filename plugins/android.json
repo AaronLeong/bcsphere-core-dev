@@ -18,7 +18,8 @@
             },
             "/manifest/application": {
                 "<uses-library android:name=\"com.htc.android.bluetooth.le\" android:required=\"false\" />": 1
-            }
+            },
+            "/*": {}
         }
     },
     "installed_plugins": {

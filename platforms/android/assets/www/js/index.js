@@ -212,7 +212,7 @@ var app = {
 		var serviceIndex = sessionStorage.getItem("serviceIndex");
 		var service = app.device.services[serviceIndex];
 		service.characteristics[3].subscribe(function(){alert("3");});
-		alert("222222");
+		//alert("222222");
 		service.characteristics[6].subscribe(function(){alert("6");});
 	},
 	
@@ -564,4 +564,5 @@ var app = {
 			"00000000-0000-0000-0000-000000000000",111,222,""
 		);
 	},
+
 };

@@ -255,7 +255,7 @@
 			if(DEBUG){
 				alert(JSON.stringify(data));
 			}
-			window.APPID = data.appID;
+			window.APPURL = window.location.href;
 			window.DEVICEADDRESS = data.deviceAddress;
 			window.API = data.api;
 			window.VERSION = data.version;
@@ -446,12 +446,12 @@
 			this.connect = function(device){
 				var connectSuccess = device.connectSuccess.bind(device,device.connectSuccess);
 				var connectError = device.connectError.bind(device,device.connectError);
-				navigator.bluetooth.connectDevice(connectSuccess,connectError,device.deviceAddress,APPID);
+				navigator.bluetooth.connectDevice(connectSuccess,connectError,device.deviceAddress,APPURL);
 			};
 			this.disconnect = function(device){
 				var disconnectSuccess = device.disconnectSuccess.bind(device,device.disconnectSuccess);
 				var disconnectError = device.disconnectSuccess.bind(device,device.disconnectError);
-				navigator.bluetooth.disconnectDevice(disconnectSuccess,disconnectError,device.deviceAddress,APPID);
+				navigator.bluetooth.disconnectDevice(disconnectSuccess,disconnectError,device.deviceAddress,APPURL);
 			};
 			
 			this.writeCharacteristic = function(character,value){
@@ -620,6 +620,11 @@
 			this.devices = {};
 			this.services = {};
 			this.isopen = false;
+
+			this.UUIDMap = {};
+  			this.UUIDMap["00001802-0000-1000-8000-00805f9b34fb"] = BC.ImmediateAlert;
+  			this.UUIDMap["00001803-0000-1000-8000-00805f9b34fb"] = BC.LinkLoss;
+  			this.UUIDMap["00001804-0000-1000-8000-00805f9b34fb"] = BC.TxPower;
 		},
 	
 		addSystemListener : function(eventName,callback,arg){
@@ -1045,8 +1050,11 @@
 		discoverServices : function(success,error){
 			this.success = success;
 			this.error = error;
-			BC.bluetooth.discoverServices(this);
-			
+			if(this.services == undefined || this.services == null || this.services.length==0){
+			    BC.bluetooth.discoverServices(this);
+			}else{
+			    this.success();
+			}
 		},
 		
 		discoverServicesSuccess : function(){
@@ -1057,7 +1065,11 @@
                     var sindex = service.serviceIndex;
                     var sname = service.serviceName;
                     var suuid = service.serviceUUID;
-                    device.services.push(new BC.Service({index:sindex,uuid:suuid,name:sname,device:device}));
+                    if(BC.bluetooth.UUIDMap[suuid]){
+                    	device.services.push(new BC.bluetooth.UUIDMap[suuid]({index:sindex,uuid:suuid,name:sname,device:device}));
+                    }else{
+                    	device.services.push(new BC.Service({index:sindex,uuid:suuid,name:sname,device:device}));
+                    }
                 }
             );
 
@@ -1278,6 +1290,7 @@
 	});
 	GATTEntity.extend = extend;
   
+ 
   /**
    * BLE Service class.
    * @class
@@ -1334,7 +1347,11 @@
 		discoverCharacteristics : function(success,error){
 			this.success = success;
 			this.error = error;
-			BC.bluetooth.discoverCharacteristics(this);
+			if(this.characteristics == undefined || this.characteristics == null || this.characteristics.length == 0){
+				BC.bluetooth.discoverCharacteristics(this);
+			}else{
+				this.success();
+			}
 		},
 		
 		discoverCharacteristicsSuccess : function(){
@@ -1380,6 +1397,109 @@
 		},
   });
   
+	var ImmediateAlert = BC.ImmediateAlert = BC.Service.extend({
+
+	   characteristicUUID:'2a06',
+
+	   no_alert : function(){
+	      this.alert('0');
+	   },
+	   
+	   mild_alert : function(){
+	      this.alert('1');
+	   },
+	   
+	   high_alert : function(){
+	      this.alert('2');
+	   },
+	   
+	   alert:function(writeValue,writeType,successFunc,errorFunc){
+	   	  successFunc = successFunc || this.writeSuccess;
+	   	  errorFunc = errorFunc || this.writeError;
+	   	  writeType = writeType ||　'hex';
+       	  this.discoverCharacteristics(function(){
+            	this.getCharacteristicByUUID(this.characteristicUUID)[0].write(writeType,writeValue,successFunc,errorFunc);
+          });
+	   },
+	      
+	   writeSuccess : function(){
+	      console.log('writeSuccess');
+	   },
+	   
+	   writeError : function(){
+	      console.log('writeFailed');
+	   },
+
+	});
+
+
+	var LinkLoss = BC.LinkLoss = BC.Service.extend({
+
+		characteristicUUID:'2a06',
+
+		no_alert : function(){
+		  this.alert('0');
+		},
+
+		mild_alert : function(){
+		  this.alert('1');
+		},
+
+		high_alert : function(){
+		  this.alert('2');
+		},
+
+		getValue : function(callback){
+		  	this.discoverCharacteristics(function(){
+			    this.getCharacteristicByUUID(this.characteristicUUID)[0].read(function(data){
+			 		callback(data.value);
+			    });
+			});
+		},
+	   
+	    alert:function(writeValue,writeType,successFunc,errorFunc){
+	    	successFunc = successFunc || this.writeSuccess;
+	   	    errorFunc = errorFunc || this.writeError;
+	   	    writeType= writeType ||　'hex';
+		    this.discoverCharacteristics(function(){
+		        this.getCharacteristicByUUID(this.characteristicUUID)[0].write(writeType,writeValue,successFunc,errorFunc);
+		    });
+	    },
+	      
+		writeSuccess : function(){
+		  console.log('writeSuccess');
+		},
+
+		writeError : function(){
+		  console.log('writeFailed');
+		},
+
+	});
+
+	var TxPower = BC.TxPower = BC.Service.extend({
+
+	   	characteristicUUID:'2a07',
+
+		getValue : function(callback){
+   	    	this.discoverCharacteristics(function(){
+				this.getCharacteristicByUUID(this.characteristicUUID)[0].read(function(data){
+	         	    callback(data.value);
+	            });
+	        });
+		},
+
+	    notify : function(callback){
+	   		this.discoverCharacteristics(function(){
+	   			this.getCharacteristicByUUID(this.characteristicUUID)[0].subscribe(function(data){
+	   				callback(data.value);
+	   			});
+	   		});
+	    },
+
+	});
+	
+
+
     /**
 	 * Triggered when server's characteristic has been subscribe/unsubscribe.
 	 * @example var character1 = BC.Bluetooth.CreateCharacteristic("0000ffe1-0000-1000-8000-00805f9b34fb","01","Hex",["notify"],["read","write"]);
@@ -1557,9 +1677,7 @@
 			data.characteristicIndex = obj.characteristicIndex;
 			data.date = obj.date;
 			data.deviceAddress = obj.deviceAddress;
-			alert(JSON.stringify(data));
-			BC.bluetooth.devices[data.deviceAddress].services[data.serviceIndex].characteristics[data.characteristicIndex].callback(data);
-			//this.callback(data);
+			this.callback(data);
 		},
 		
 		/**
