@@ -39,4 +39,7 @@
     <feature name="BCIBeacon">
         <param name="ios-package" value="BCIBeacon" />
     </feature>
+    <feature name="BluetoothSerial">
+        <param name="ios-package" onload="true" value="MEGBluetoothSerial" />
+    </feature>
 </widget>

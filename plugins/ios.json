@@ -6,7 +6,8 @@
     "config_munge": {
         "framework": {
             "CoreBluetooth.framework": {
-                "true": 2
+                "true": 2,
+                "false": 1
             },
             "AssetsLibrary.framework": {},
             "MobileCoreServices.framework": {}
@@ -16,6 +17,9 @@
                 "<feature name=\"BCWifi\"><param name=\"ios-package\" value=\"org.bcsphere.wifi.BCWifi\" /></feature>": 1,
                 "<feature name=\"BCBluetooth\"><param name=\"ios-package\" value=\"BCBluetooth\" /></feature>": 1,
                 "<feature name=\"BCIBeacon\"><param name=\"ios-package\" value=\"BCIBeacon\" /></feature>": 1
+            },
+            "/widget": {
+                "<feature name=\"BluetoothSerial\"><param name=\"ios-package\" onload=\"true\" value=\"MEGBluetoothSerial\" /></feature>": 1
             }
         }
     },
@@ -24,6 +28,9 @@
             "PACKAGE_NAME": "org.bcsphere.bcsphere-core-dev"
         },
         "org.bcsphere.ibeacon": {
+            "PACKAGE_NAME": "com.jumacc.BCJS"
+        },
+        "com.megster.cordova.bluetoothserial": {
             "PACKAGE_NAME": "com.jumacc.BCJS"
         }
     },

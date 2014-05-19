@@ -126,10 +126,6 @@ var bluetooth = {
 	addEventListener : function(callback,errorFunc,arg){
 		cordova.exec(callback,errorFunc,"BCBluetooth","addEventListener",[{"eventName":arg.eventName,"arg":arg.arg}]);
 	},
-	
-	/*openDebugModel : function(level,module){
-		cordova.exec(null,null,"BCBluetooth","openDebugModel",[{"level","module":}]);
-	},*/
 };
 module.exports = bluetooth;
 

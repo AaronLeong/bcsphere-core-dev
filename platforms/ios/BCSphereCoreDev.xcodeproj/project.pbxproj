@@ -40,8 +40,11 @@
 		7E7966E71810823500FA85AD /* icon-small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966DD1810823500FA85AD /* icon-small@2x.png */; };
 		B41141DB546C45BFBC7AE6CC /* BCWifi.m in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B541FDE649D18A7C113A /* BCWifi.m */; };
 		D4A0D8761607E02300AEF8BB /* Default-568h@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = D4A0D8751607E02300AEF8BB /* Default-568h@2x~iphone.png */; };
-		61B6EBC87A3C422D9D4701B2 /* BCBluetooth.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C766C01A9BE436083BC0AF4 /* BCBluetooth.m */; };
-		CA6B0DF4B7804857B3969F17 /* BCIBeacon.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C3E8182D35340B190731E28 /* BCIBeacon.m */; };
+		4336E7331EED48C98A8529B1 /* BCBluetooth.m in Sources */ = {isa = PBXBuildFile; fileRef = 64458CD6946D47B293B8253D /* BCBluetooth.m */; };
+		ED08572F331C4FD98C3B8036 /* BCIBeacon.m in Sources */ = {isa = PBXBuildFile; fileRef = B417665CC4CA4123879B00B8 /* BCIBeacon.m */; };
+		58BFEA486AFE4891985A10BA /* MEGBluetoothSerial.m in Sources */ = {isa = PBXBuildFile; fileRef = FE959E02C1D44476B856D0F9 /* MEGBluetoothSerial.m */; };
+		334210D2637943768BB953C5 /* CBPeripheral+Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 13653C9CEAF34424A0C08F54 /* CBPeripheral+Extensions.m */; };
+		342E90BB60BD4E1C852E0FF8 /* BLE.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C3C0A4DCF5145D59D586A11 /* BLE.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -114,10 +117,17 @@
 		EB87FDF31871DA8E0020F90C /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = www; path = ../../www; sourceTree = "<group>"; };
 		EB87FDF41871DAF40020F90C /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = ../../config.xml; sourceTree = "<group>"; };
 		F840E1F0165FE0F500CFE078 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = BCSphereCoreDev/config.xml; sourceTree = "<group>"; };
-		1C766C01A9BE436083BC0AF4 /* BCBluetooth.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "BCBluetooth.m"; path = "Plugins\org.bcsphere.bluetooth\BCBluetooth.m"; sourceTree = "<group>"; fileEncoding = 4; };
-		BE7C35CCEA144513B0B519AC /* BCBluetooth.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "BCBluetooth.h"; path = "Plugins\org.bcsphere.bluetooth\BCBluetooth.h"; sourceTree = "<group>"; fileEncoding = 4; };
-		3C3E8182D35340B190731E28 /* BCIBeacon.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "BCIBeacon.m"; path = "Plugins\org.bcsphere.ibeacon\BCIBeacon.m"; sourceTree = "<group>"; fileEncoding = 4; };
-		73408DC138DC4E5ABB13E6E9 /* BCIBeacon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "BCIBeacon.h"; path = "Plugins\org.bcsphere.ibeacon\BCIBeacon.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		64458CD6946D47B293B8253D /* BCBluetooth.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "BCBluetooth.m"; path = "Plugins\org.bcsphere.bluetooth\BCBluetooth.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		FAF2FD763E1642039CC78E18 /* BCBluetooth.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "BCBluetooth.h"; path = "Plugins\org.bcsphere.bluetooth\BCBluetooth.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		B417665CC4CA4123879B00B8 /* BCIBeacon.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "BCIBeacon.m"; path = "Plugins\org.bcsphere.ibeacon\BCIBeacon.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		64D8CDE54EA24729A4C7EB1B /* BCIBeacon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "BCIBeacon.h"; path = "Plugins\org.bcsphere.ibeacon\BCIBeacon.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		FE959E02C1D44476B856D0F9 /* MEGBluetoothSerial.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "MEGBluetoothSerial.m"; path = "Plugins\com.megster.cordova.bluetoothserial\BluetoothSerial\MEGBluetoothSerial.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		13653C9CEAF34424A0C08F54 /* CBPeripheral+Extensions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CBPeripheral+Extensions.m"; path = "Plugins\com.megster.cordova.bluetoothserial\BluetoothSerial\CBPeripheral+Extensions.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		8C3C0A4DCF5145D59D586A11 /* BLE.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "BLE.m"; path = "Plugins\com.megster.cordova.bluetoothserial\BluetoothSerial\BLE.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		6D8DBD5658A74A3F844FC9EC /* MEGBluetoothSerial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "MEGBluetoothSerial.h"; path = "Plugins\com.megster.cordova.bluetoothserial\BluetoothSerial\MEGBluetoothSerial.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		94CEE63BD7E64F88AF1B6087 /* CBPeripheral+Extensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CBPeripheral+Extensions.h"; path = "Plugins\com.megster.cordova.bluetoothserial\BluetoothSerial\CBPeripheral+Extensions.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		EF9A710FC7C24BEB916019A2 /* BLE.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "BLE.h"; path = "Plugins\com.megster.cordova.bluetoothserial\BluetoothSerial\BLE.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		F0320BB0D15442DF9401E1BF /* BLEDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "BLEDefines.h"; path = "Plugins\com.megster.cordova.bluetoothserial\BluetoothSerial\BLEDefines.h"; sourceTree = "<group>"; fileEncoding = 4; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -247,10 +257,17 @@
 				713C41BA1907964800C53BCB /* BCBluetooth.m */,
 				EAF7B541FDE649D18A7C113A /* BCWifi.m */,
 				409C5C29900B4E6FB791723E /* BCWifi.h */,
-				1C766C01A9BE436083BC0AF4 /* BCBluetooth.m */,
-				BE7C35CCEA144513B0B519AC /* BCBluetooth.h */,
-				3C3E8182D35340B190731E28 /* BCIBeacon.m */,
-				73408DC138DC4E5ABB13E6E9 /* BCIBeacon.h */,
+				64458CD6946D47B293B8253D /* BCBluetooth.m */,
+				FAF2FD763E1642039CC78E18 /* BCBluetooth.h */,
+				B417665CC4CA4123879B00B8 /* BCIBeacon.m */,
+				64D8CDE54EA24729A4C7EB1B /* BCIBeacon.h */,
+				FE959E02C1D44476B856D0F9 /* MEGBluetoothSerial.m */,
+				13653C9CEAF34424A0C08F54 /* CBPeripheral+Extensions.m */,
+				8C3C0A4DCF5145D59D586A11 /* BLE.m */,
+				6D8DBD5658A74A3F844FC9EC /* MEGBluetoothSerial.h */,
+				94CEE63BD7E64F88AF1B6087 /* CBPeripheral+Extensions.h */,
+				EF9A710FC7C24BEB916019A2 /* BLE.h */,
+				F0320BB0D15442DF9401E1BF /* BLEDefines.h */,
 			);
 			name = Plugins;
 			path = BCSphereCoreDev/Plugins;
@@ -446,8 +463,11 @@
 				1D3623260D0F684500981E51 /* AppDelegate.m in Sources */,
 				302D95F114D2391D003F00A1 /* MainViewController.m in Sources */,
 				B41141DB546C45BFBC7AE6CC /* BCWifi.m in Sources */,
-				61B6EBC87A3C422D9D4701B2 /* BCBluetooth.m in Sources */,
-				CA6B0DF4B7804857B3969F17 /* BCIBeacon.m in Sources */,
+				4336E7331EED48C98A8529B1 /* BCBluetooth.m in Sources */,
+				ED08572F331C4FD98C3B8036 /* BCIBeacon.m in Sources */,
+				58BFEA486AFE4891985A10BA /* MEGBluetoothSerial.m in Sources */,
+				334210D2637943768BB953C5 /* CBPeripheral+Extensions.m in Sources */,
+				342E90BB60BD4E1C852E0FF8 /* BLE.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

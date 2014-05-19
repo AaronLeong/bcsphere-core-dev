@@ -15,6 +15,13 @@ module.exports = [
         ]
     },
     {
+        "file": "plugins/com.megster.cordova.bluetoothserial/www/bluetoothSerial.js",
+        "id": "com.megster.cordova.bluetoothserial.bluetoothSerial",
+        "clobbers": [
+            "window.bluetoothSerial"
+        ]
+    },
+    {
         "file": "plugins/org.bcsphere.bluetooth/www/bluetooth.js",
         "id": "org.bcsphere.bluetooth.bluetooth",
         "merges": [
@@ -27,6 +34,7 @@ module.exports.metadata =
 {
     "org.bcsphere.wifi": "0.0.1",
     "org.bcsphere.ibeacon": "0.1.0",
+    "com.megster.cordova.bluetoothserial": "0.3.0",
     "org.bcsphere.bluetooth": "0.3.0"
 }
 // BOTTOM OF METADATA

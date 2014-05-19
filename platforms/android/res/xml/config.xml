@@ -21,4 +21,7 @@
     <feature name="BCBluetooth">
         <param name="android-package" value="org.bcsphere.bluetooth.BCBluetooth" />
     </feature>
+    <feature name="BluetoothSerial">
+        <param name="android-package" value="com.megster.cordova.BluetoothSerial" />
+    </feature>
 </widget>

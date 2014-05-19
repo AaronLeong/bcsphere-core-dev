@@ -74,7 +74,7 @@
 	var time = 0;
 	document.addEventListener("bccoreready",function(){
 		window.setTimeout(function(){
-			var interval = window.setInterval(function() {
+			/*var interval = window.setInterval(function() {
 				var isAllReady = true;
 				for(var plugin in BC.plugins){
 					if(time == 5){
@@ -90,7 +90,8 @@
 				if(isAllReady){
 					BC.Tools.FireDocumentEvent("bcready");
 				}
-			}, 100);
+			}, 100);*/
+			BC.Tools.FireDocumentEvent("bcready");
 		},100);
 	});
 	
