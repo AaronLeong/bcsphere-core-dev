@@ -1,0 +1,11 @@
+<h1>characteristics</h1>
+<ul>
+   <li ng-repeat="characteristic in characteristics">
+       <a href="#/operate_char/{{characteristic.device.deviceAddress}}/{{characteristic.upper.index}}/{{characteristic.index}}">
+	       	{{characteristic.name}}
+	   </a>
+	   <p>{{characteristic.index}}</p>
+	   <p><span ng-repeat="property in characteristic.property">{{property}}&nbsp;</span></p>
+	   <p>{{characteristic.uuid}}</p>
+   </li>
+</ul>

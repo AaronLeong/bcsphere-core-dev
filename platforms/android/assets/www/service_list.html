@@ -1,0 +1,11 @@
+<h1>services</h1>
+<input type="button" ng-click="showAdvData()" value="Show Advertisement Data" />
+<ul>
+   <li ng-repeat="service in services">
+       <a href="#/char_list/{{service.device.deviceAddress}}/{{service.index}}">
+	      {{service.name}}
+	   </a>
+	   <p>{{service.index}}</p>
+	   <p>{{service.uuid}}</p>
+   </li>
+</ul>

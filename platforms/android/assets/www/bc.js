@@ -1368,7 +1368,6 @@
                     service.characteristics.push(new BC.Characteristic({index:cindex,uuid:cuuid,name:cname,device:device,upper:service,property:property}));
                 }
             );
-            
 			this.success();
 		},
 		

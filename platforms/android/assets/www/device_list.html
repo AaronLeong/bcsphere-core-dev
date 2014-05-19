@@ -4,10 +4,10 @@
 </select>
 <ul>
    <li ng-repeat="device in devices">
-       <a href="#/devices/{{device.deviceAddress}}">
+        <a href="#/service_list/{{device.deviceAddress}}">
 	       	{{device.deviceName}}
-	   </a>
-	       	<p>{{device.deviceAddress}}</p>
-	       	<p>{{device.RSSI}}</p>
+	    </a>
+       	<p>{{device.deviceAddress}}</p>
+       	<p>{{device.RSSI}}</p>
    </li>
 </ul>
