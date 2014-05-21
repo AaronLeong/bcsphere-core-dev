@@ -2,8 +2,9 @@
 
 var bccoredevControllers = angular.module('bccoredevControllers',[]);
 
-bccoredevControllers.controller('DeviceListCtrl',["$scope",function($scope){
-	$scope.switchScanItem = '0';
+bccoredevControllers.controller('DeviceListCtrl',["$scope",'$location',function($scope,$location){
+
+	$scope.switchScanItem = false;
 	if(BC.bluetooth){
 		$scope.devices = BC.bluetooth.devices;
 	}else{
@@ -14,16 +15,20 @@ bccoredevControllers.controller('DeviceListCtrl',["$scope",function($scope){
 	setInterval(function(){$scope.$apply();},100);
 
 	$scope.switchScan = function(){
-		if($scope.switchScanItem == 1){
+		if($scope.switchScanItem){
 			BC.Bluetooth.StartScan();
 		}else{
 			BC.Bluetooth.StopScan();
 		}
 	};
+
+	$scope.changePage = function(deviceAddress){
+		return $location.path("\/service_list\/"+deviceAddress);
+	};
 }]);
 
-bccoredevControllers.controller('ServiceListCtrl',['$scope','$routeParams',
-	function($scope,$routeParams){
+bccoredevControllers.controller('ServiceListCtrl',['$scope','$location','$routeParams',
+	function($scope,$location,$routeParams){
 		BC.Bluetooth.StopScan();
 		var deviceAddress = $routeParams.deviceAddress;
 		var device = BC.bluetooth.devices[deviceAddress];
@@ -48,23 +53,28 @@ bccoredevControllers.controller('ServiceListCtrl',['$scope','$routeParams',
     		},function(){});
 	    }
 	    //setInterval(function(){$scope.$apply();},100);
+	    $scope.changePage = function(deviceAddress,serviceIndex){
+	    	return $location.path("\/char_list\/"+deviceAddress+"\/"+serviceIndex);
+	    }
 	}
 ]);
 
-bccoredevControllers.controller('CharListCtrl',['$scope','$routeParams',
-	function($scope,$routeParams){
+bccoredevControllers.controller('CharListCtrl',['$scope','$location','$routeParams',
+	function($scope,$location,$routeParams){
 		var deviceAddress = $routeParams.deviceAddress;
 		var serviceIndex = $routeParams.serviceIndex;
 		var device = BC.bluetooth.devices[deviceAddress];
 		var service = device.services[serviceIndex];
-
 		service.discoverCharacteristics(function(){
     		$scope.characteristics = service.characteristics;
     	},function(){
     		alert("discoverCharacteristicsFailed");
     	});
 
-	    setInterval(function(){$scope.$apply();},100);
+	    //setInterval(function(){$scope.$apply();},100);
+	    $scope.changePage = function(deviceAddress,serviceIndex,characteristicIndex){
+	    	return $location.path("\/operate_char\/"+deviceAddress+"\/"+serviceIndex+"\/"+characteristicIndex);
+	    }
 	}
 ]);
 

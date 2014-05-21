@@ -1,11 +1,24 @@
-<h1>characteristics</h1>
-<ul>
-   <li ng-repeat="characteristic in characteristics">
-       <a href="#/operate_char/{{characteristic.device.deviceAddress}}/{{characteristic.upper.index}}/{{characteristic.index}}">
-	       	{{characteristic.name}}
-	   </a>
-	   <p>{{characteristic.index}}</p>
-	   <p><span ng-repeat="property in characteristic.property">{{property}}&nbsp;</span></p>
-	   <p>{{characteristic.uuid}}</p>
-   </li>
-</ul>
+<ons-page class="left">
+	<ons-scroller>
+	    <div class="topcoat-list">
+		    <ul class="topcoat-list__container">
+		      <li class="topcoat-list__item"  ng-repeat="characteristic in characteristics">
+		      <div ng-click="changePage(characteristic.device.deviceAddress,characteristic.upper.index,characteristic.index)">
+			        <span>
+						{{characteristic.name}}
+					</span>
+					<span>
+				    	{{characteristic.index}}
+				    </span>
+				    <span>
+				    	{{characteristic.property}}
+				    </span>
+				    <span>
+				    	{{characteristic.uuid}}
+				    </span>
+			    </div>
+		      </li>
+		    </ul>
+	    </div>
+	</ons-scroller>
+</ons-page>

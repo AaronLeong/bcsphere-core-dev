@@ -1,7 +1,8 @@
 var bccoredevApp = angular.module('bccoredev',[
 	'ngTouch',
 	'ngRoute',
-	'bccoredevControllers'
+	'bccoredevControllers',
+	'onsen.directives'
 ]);
 
 bccoredevApp.config(['$routeProvider',
