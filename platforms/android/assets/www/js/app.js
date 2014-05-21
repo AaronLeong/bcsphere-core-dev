@@ -28,6 +28,10 @@ bccoredevApp.config(['$routeProvider',
 			templateUrl: 'desc_list.html',
 			controller: 'DescListCtrl'
 		}).
+		when('/classical_operation/:deviceAddress',{
+			templateUrl: 'classical_operation.html',
+			controller: 'ClassicalOperationCtrl'
+		}).
 		otherwise({
 			redirectTo: '/device_list'
 		});

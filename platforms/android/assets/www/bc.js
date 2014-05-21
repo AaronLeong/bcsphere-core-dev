@@ -204,7 +204,7 @@
 			descriptor.dispatchEvent("ondescriptorwrite");
 		});
 		BC.bluetooth.addSystemListener("newadvpacket",function(scanData){
-			var advertisementData,deviceAddress,deviceName,isCon,RSSI,txPower;
+			var advertisementData,deviceAddress,deviceName,isCon,RSSI,txPower,type;
 			if(scanData['advertisementData']){
 				advertisementData = scanData['advertisementData'];
 				if(advertisementData.manufacturerData){
@@ -223,21 +223,26 @@
 			if(scanData['RSSI']){
 				RSSI = parseInt(scanData['RSSI']);
 			}
+			if(scanData['type']){
+				type = scanData['type'];
+			}
 			
 			var isConnected = false;
 			if(isCon === "true"){
 				isConnected = true;
 			}
 			if(isNewDevice(deviceAddress)){
-				var newdevice = new BC.Device({deviceAddress:deviceAddress,deviceName:deviceName,advertisementData:advertisementData,isConnected:isConnected,RSSI:RSSI});
+				var newdevice = new BC.Device({deviceAddress:deviceAddress,deviceName:deviceName,advertisementData:advertisementData,isConnected:isConnected,RSSI:RSSI,type:type});
 				BC.bluetooth.devices[deviceAddress] = newdevice;
 				BC.bluetooth.dispatchEvent("newdevice",newdevice);
 			}else{
 				var thedevice = BC.bluetooth.devices[deviceAddress];
-				thedevice.RSSI = RSSI;
-				//IOS will regard the different advertisement data which broadcast from same bluetooth address as different device
-				//so be careful if you want to develop application based on changing advertisement data
-				thedevice.advertisementData = advertisementData;	
+				if(type == "BLE"){
+					thedevice.RSSI = RSSI;
+					//IOS will regard the different advertisement data which broadcast from same bluetooth address as different device
+					//so be careful if you want to develop application based on changing advertisement data
+					thedevice.advertisementData = advertisementData;	
+				}
 				thedevice.advTimestamp = new Date().getTime();
 			}
 			
@@ -538,6 +543,36 @@
 				var notifyError = characteristic.notifyError.bind(characteristic,characteristic.notifyError);
 				navigator.bluetooth.notify(notifySuccess,notifyError,characteristic.upper.uniqueID,characteristic.index,data);
 			};
+			this.startClassicalScan = function(){
+				navigator.bluetooth.startClassicalScan(testFunc,testFunc);
+			};
+			this.stopClassicalScan = function(){
+				navigator.bluetooth.stopClassicalScan(testFunc,testFunc);
+			};
+			this.classicalRead = function(device){
+				var readSuccess = device.readSuccess.bind(device,device.readSuccess);
+				var readError = device.readError.bind(device,device.readError);
+				navigator.bluetooth.classicalRead(readSuccess,readError,device.deviceAddress);
+			};
+			this.classicalWrite = function(device,value){
+				var writeSuccess = device.writeSuccess.bind(device.writeSuccess);
+				var writeError = device.writeError.bind(device.writeError);
+				navigator.bluetooth.classicalWrite(writeSuccess,writeError,device.deviceAddress,value);
+			};
+			this.classicalSubscribe = function(device){
+				var subscribeCallback = device.subscribeCallback.bind(device,device.subscribeCallback);
+				navigator.bluetooth.classicalSubscribe(subscribeCallback,testFunc,device.deviceAddress);
+			};
+			this.classicalConnect = function(device){
+				var connectSuccess = device.classicalConnectSuccess.bind(device,device.classicalConnectSuccess);
+				var connectError = device.classicalConnectError.bind(device,device.classicalConnectError);
+				navigator.bluetooth.classicalConnect(connectSuccess,connectError,device.deviceAddress,APPURL);
+			};
+			this.classicalDisconnect = function(device){
+				var disconnectSuccess = device.classicalDisconnectSuccess.bind(device,device.classicalDisconnectSuccess);
+				var disconnectError = device.classicalDisconnectSuccess.bind(device,device.classicalDisconnectError);
+				navigator.bluetooth.classicalDisconnect(disconnectSuccess,disconnectError,device.deviceAddress,APPURL);
+			};
 			
 		}else{
 			alert(type+" is not support now.");
@@ -615,6 +650,15 @@
 			this.addServices =  this.bluetoothFuncs.addServices;
 			this.removeService = this.bluetoothFuncs.removeService;
 			this.notify = this.bluetoothFuncs.notify;
+			
+			//classical Bluetooth 2.1 interface
+			this.startClassicalScan = this.bluetoothFuncs.startClassicalScan;
+			this.stopClassicalScan = this.bluetoothFuncs.stopClassicalScan;
+			this.classicalRead = this.bluetoothFuncs.classicalRead;
+			this.classicalWrite = this.bluetoothFuncs.classicalWrite;
+			this.classicalSubscribe = this.bluetoothFuncs.classicalSubscribe;
+			this.classicalConnect = this.bluetoothFuncs.classicalConnect;
+			this.classicalDisconnect = this.bluetoothFuncs.classicalDisconnect;
 			
 			this.bluetoothFuncs.initBluetooth();
 			
@@ -740,6 +784,27 @@
 	 */
 	var StopScan = BC.Bluetooth.StopScan = function(){
 		BC.bluetooth.stopScan();
+	};
+	
+	/** 
+	 * Starts a classical scan(Bluetooth 2.1) for Bluetooth devices, the device will also push into the BC.bluetooth.devices array.
+	 * @memberof Bluetooth
+	 * @method 
+	 * @example BC.Bluetooth.StartClassicalScan();
+	 * @fires Bluetooth#newdevice
+	 */                                   
+	var StartClassicalScan = BC.Bluetooth.StartClassicalScan = function(){
+		BC.bluetooth.startClassicalScan();
+	};
+
+	/** 
+	 * Stops classical scan(Bluetooth 2.1) for Bluetooth devices.
+	 * @memberof Bluetooth
+	 * @method 
+	 * @example BC.Bluetooth.StopClassicalScan();
+	 */
+	var StopClassicalScan = BC.Bluetooth.StopClassicalScan = function(){
+		BC.bluetooth.stopClassicalScan();
 	};
 	
 	/** 
@@ -965,6 +1030,7 @@
 	 * @property {DataValue} hardwareRevision - The hardware revision of this device
 	 * @property {DataValue} softwareRevision - The software revision of this device
 	 * @property {DataValue} manufacturerName - The manufacturer name of this device
+	 * @property {type} type - The type of this device('BLE' or 'Classical')
 	 */
 	var Device = BC.Device = BC.EventDispatcher.extend({
 		
@@ -984,6 +1050,7 @@
 			this.manufacturerName = null;
 			this.RSSI = arg.RSSI;
 			this.advTimestamp = new Date().getTime();
+			this.type = arg.type;
 			if(!BC.Tools.IsEmpty(this.deviceInitialize)){
 				this.deviceInitialize.apply(this, arguments);
 			}
@@ -1014,6 +1081,34 @@
 		},
 		
 		connectError : function(){
+			this.error();
+		},
+		
+		/**
+		 * Initiates a classical RFCOMM connection to the peripheral.
+		 * @memberof Device
+		 * @example //Gets a the Device instance.
+		 * var device = window.device = BC.bluetooth.devices["78:C5:E5:99:26:37"];
+		 * device.classicalConnect(function(){alert("device RFCOMM is connected!");});
+		 * device.addEventListener("deviceconnected",function(s){alert("device:" + s.deviceAddress + "is connected successfully!")});
+		 * @param {function} successCallback - Success callback
+		 * @param {function} [errorCallback] - Error callback
+		 * @fires Device#deviceconnected
+		 * @instance
+		 */
+		classicalConnect : function(success,error){
+			this.success = success;
+			this.error = error;
+			BC.bluetooth.classicalConnect(this);
+		},
+		
+		classicalConnectSuccess : function(){
+			this.isConnected = true;
+			this.dispatchEvent("deviceconnected");
+			this.success();
+		},
+		
+		classicalConnectError : function(){
 			this.error();
 		},
 		
@@ -1121,6 +1216,29 @@
 		},
 		
 		disconnectError : function(){
+			this.error();
+		},
+		
+		/**
+		 * Disconnects a RFCOMM peripheral.
+		 * @memberof Device
+		 * @example device.classicalDisconnect();
+		 * @param {function} [successCallback] - Success callback
+		 * @param {function} [errorCallback] - Error callback
+		 * @instance
+		 */		
+		classicalDisconnect : function(success,error){
+			this.success = success;
+			this.error = error;
+			BC.bluetooth.classicalDisconnect(this);
+		},
+		
+		classicalDisconnectSuccess : function(){
+			this.isConnected = false;
+			this.success();
+		},
+		
+		classicalDisconnectError : function(){
 			this.error();
 		},
 		
@@ -1273,6 +1391,105 @@
 			);
 			return result;
 		},
+		
+		/**
+		 * Reads value from classical RFCOMM interface.(only support Bluetooth2.1 device)
+		 * @memberof Device
+		 * @example 
+		 * device.classicalConnect(function(){
+		 *	device.classicalRead(readSuccess);
+		 * });
+		 * function readSuccess(data){
+		 *	alert("Data : "+JSON.stringify(data.value)+" \n Time :"+data.date);
+		 * }
+		 * @param {function} successCallback - Success callback
+		 * @param {function} [errorCallback] - Error callback
+		 * @instance
+		 */
+		classicalRead : function(success,error){
+			this.success = success;
+			this.error = error;
+			BC.bluetooth.classicalRead(this);
+		},
+		readSuccess : function(){
+			var data = {};
+            data.deviceAddress=this.deviceAddress;
+            data.date = arguments[1].date;
+            data.value = new BC.DataValue(BC.Tools.Base64ToBuffer(arguments[1].value));
+			this.success(data);
+		},
+		readError : function(){
+			this.error("read data error");
+		},
+		
+		/**
+		 * Writes the value into RFCOMM interface.(only support Bluetooth2.1 device)
+		 * @memberof Device
+		 * @example 
+		 * //write after device is well prepared.
+		 * device.classicalConnect(function(){
+		 *	device.classicalWrite("Hex","01",writeSuccess);
+		 * });
+		 * function writeSuccess(data){
+		 *	alert("write success!");
+		 * }
+		 * @param {string} type - The type of the value to write ('hex'/'ascii'/'unicode'/'raw')
+		 * @param {string/Uint8Array} value - The value write to the RFCOMM, if the 'type' is 'raw', the value type should be Uint8Array
+		 * @param {function} successCallback - Success callback
+		 * @param {function} [errorCallback] - Error callback
+		 * @instance
+		 */
+		classicalWrite : function(type,value,success,error){
+			this.success = success;
+			this.error = error;
+			if(type.toLowerCase() == "hex"){
+				value = BC.Tools.HexToBase64(value);
+			}else if(type.toLowerCase() == "ascii"){
+				value = BC.Tools.ASCIIToBase64(value);
+			}else if(type.toLowerCase() == "unicode"){
+				value = BC.Tools.UnicodeToBase64(value);
+			}else if(type.toLowerCase() == "raw"){
+				value = BC.Tools.ConvertToBase64(value);
+			}else{
+				error("Please input 'hex'/'ascii'/'unicode' type.");
+				return;
+			}
+			BC.bluetooth.classicalWrite(this,value);
+		},
+		writeSuccess : function(){
+			this.success(arguments);
+		},
+		writeError : function(){
+			this.error(arguments);
+		},
+		
+		/**
+		 * Subscribes the notification of this device RFCOMM.
+		 * @memberof Device
+		 * @example 
+		 * device.subscribe(onDataAvaliable);
+		 * function onDataAvaliable(data){
+		 *	$("#notifyValue_hex").html(data.value.getHexString());
+		 *	$("#notifyValue_unicode").html(data.value.getUnicodeString());
+		 *	$("#notifyValue_ascii").html(data.value.getASCIIString());
+		 *	$("#notifyDate").html(data.date);
+		 * }
+		 * @param {function} callback - Called when peripheral sends data to this device.
+		 * @instance
+		 */
+		subscribe : function(callback){
+			this.callback = callback;
+			BC.bluetooth.classicalSubscribe(this);
+		},
+		subscribeCallback : function(){
+			var obj = arguments[1];
+			var data = {};
+			data.value = new BC.DataValue(BC.Tools.Base64ToBuffer(obj.value));
+			data.date = obj.date;
+			data.deviceAddress = obj.deviceAddress;
+			this.callback(data);
+		},
+		
 	});
 	Device.extend = extend;
 	

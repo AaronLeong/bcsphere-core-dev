@@ -126,6 +126,43 @@ var bluetooth = {
 	addEventListener : function(callback,errorFunc,arg){
 		cordova.exec(callback,errorFunc,"BCBluetooth","addEventListener",[{"eventName":arg.eventName,"arg":arg.arg}]);
 	},
+	
+	startClassicalScan : function(successFunc,errorFunc){
+		alert("startClassicalScan");
+		successFunc();
+		//cordova.exec(callback,errorFunc,"BCBluetooth","startClassicalScan",[]);
+	},
+	
+	stopClassicalScan : function(successFunc,errorFunc){
+		alert("stopClassicalScan");
+		successFunc();
+		//cordova.exec(callback,errorFunc,"BCBluetooth","stopClassicalScan",[]);
+	},
+	
+	classicalRead: function(successFunc,errorFunc,deviceAddress){
+		alert("read value from RFCOMM");
+    	//cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalRead", [{"deviceAddress":deviceAddress}]);
+    },
+    
+    classicalWrite: function(successFunc,errorFunc,deviceAddress,writeValue){
+    	alert("write value to RFCOMM");
+    	//cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalWrite", [{"deviceAddress":deviceAddress,"writeValue":writeValue}]);
+    },
+    
+    classicalSubscribe: function(successFunc,errorFunc,deviceAddress){
+    	alert("classical subscribe");
+        //cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalSubscribe", [{"deviceAddress":deviceAddress}]); 
+    },
+    
+    classicalConnect: function(successFunc,errorFunc){
+    	alert("classical connect");
+    	successFunc();
+    },
+    
+    classicalDisconnect: function(successFunc,errorFunc){
+    	alert("classical disconnect");
+    	successFunc();
+    },
 };
 module.exports = bluetooth;
 

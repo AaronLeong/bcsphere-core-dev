@@ -40,6 +40,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 @SuppressLint({ "UseSparseArrays", "SimpleDateFormat", "DefaultLocale" })
 public class Tools {
 	public static final String ADVERTISEMENT_DATA = "advertisementData";
+	public static final String TYPE = "type";
 	public static final String BLUETOOTH_CLOSE = "bluetoothclose";
 	public static final String BLUETOOTH_OPEN = "bluetoothopen";
 	public static final String BLUETOOTH_STATE = "state";

@@ -21,9 +21,21 @@ bccoredevControllers.controller('DeviceListCtrl',["$scope",'$location',function(
 			BC.Bluetooth.StopScan();
 		}
 	};
+	
+	$scope.switchClassicalScan = function(){
+		if($scope.switchClassicalScanItem){
+			BC.Bluetooth.StartClassicalScan();
+		}else{
+			BC.Bluetooth.StopClassicalScan();
+		}
+	};
 
 	$scope.changePage = function(deviceAddress){
-		return $location.path("\/service_list\/"+deviceAddress);
+		if(BC.bluetooth.devices[deviceAddress].type == "BLE"){
+			return $location.path("\/service_list\/"+deviceAddress);
+		}else if(BC.bluetooth.devices[deviceAddress].type == "Classical"){
+			return $location.path("\/classical_operation\/"+deviceAddress);
+		}
 	};
 }]);
 
@@ -160,5 +172,42 @@ bccoredevControllers.controller('DescListCtrl',['$scope','$routeParams',
     		alert("discoverDescriptorsFailed");
     	});
 	    setInterval(function(){$scope.$apply();},100);
+	}
+]);
+
+bccoredevControllers.controller('ClassicalOperationCtrl',['$scope','$location','$routeParams',
+	function($scope,$location,$routeParams){
+		//var device = BC.bluetooth.devices[$routeParams.deviceAddress];
+		var device = new BC.Device({deviceAddress:"SS:CC:CC:CC",deviceName:"Dummy 2.1 Device",isConnected:false});
+		
+		if(device.isConnected == true){
+			$scope.disconnect_button_show = true;
+		}else{
+			$scope.connect_button_show = true;
+		}
+		
+		$scope.classicalConnect = function(){
+			device.classicalConnect(function(){
+				$scope.connect_button_show = false;
+				$scope.disconnect_button_show = true;
+			});
+		}
+		$scope.classicalDisconnect = function(){
+			device.classicalDisconnect(function(){
+				$scope.connect_button_show = true;
+				$scope.disconnect_button_show = false;
+			});
+		}
+		$scope.write = function(){
+			if($scope.writeValue){
+				device.classicalWrite("ascii",$scope.writeValue,function(){alert("classical write success!");});
+			}
+		}
+		$scope.read = function(){
+			device.classicalRead(function(){alert("classical read success!");});
+		}
+		$scope.subscribe = function(){
+	    	device.subscribe(function(){alert("classical subscribe success!");});
+	    }
 	}
 ]);
