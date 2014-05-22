@@ -37,6 +37,11 @@ bccoredevControllers.controller('DeviceListCtrl',["$scope",'$location',function(
 			return $location.path("\/classical_operation\/"+deviceAddress);
 		}
 	};
+	
+	$scope.rfcommListen = function(){
+		BC.Bluetooth.RFCOMMListen("listenName","7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true);
+		alert("rfcomm listen start successfully.");
+	};
 }]);
 
 bccoredevControllers.controller('ServiceListCtrl',['$scope','$location','$routeParams',
@@ -177,8 +182,7 @@ bccoredevControllers.controller('DescListCtrl',['$scope','$routeParams',
 
 bccoredevControllers.controller('ClassicalOperationCtrl',['$scope','$location','$routeParams',
 	function($scope,$location,$routeParams){
-		//var device = BC.bluetooth.devices[$routeParams.deviceAddress];
-		var device = new BC.Device({deviceAddress:"SS:CC:CC:CC",deviceName:"Dummy 2.1 Device",isConnected:false});
+		var device = BC.bluetooth.devices[$routeParams.deviceAddress];
 		
 		if(device.isConnected == true){
 			$scope.disconnect_button_show = true;
@@ -187,9 +191,11 @@ bccoredevControllers.controller('ClassicalOperationCtrl',['$scope','$location','
 		}
 		
 		$scope.classicalConnect = function(){
-			device.classicalConnect(function(){
+			device.classicalConnect("7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true,function(){
 				$scope.connect_button_show = false;
 				$scope.disconnect_button_show = true;
+			},function(){
+				alert("connect failed!");
 			});
 		}
 		$scope.classicalDisconnect = function(){
@@ -200,14 +206,14 @@ bccoredevControllers.controller('ClassicalOperationCtrl',['$scope','$location','
 		}
 		$scope.write = function(){
 			if($scope.writeValue){
-				device.classicalWrite("ascii",$scope.writeValue,function(){alert("classical write success!");});
+				device.classicalWrite("ascii",$scope.writeValue,function(){alert("classical write success!")});
 			}
 		}
 		$scope.read = function(){
-			device.classicalRead(function(){alert("classical read success!");});
+			device.classicalRead(function(data){alert("classical read success! Data: " + data);});
 		}
 		$scope.subscribe = function(){
-	    	device.subscribe(function(){alert("classical subscribe success!");});
+	    	device.subscribe(function(data){alert(JSON.stringify(data.value.toString()));});
 	    }
 	}
 ]);

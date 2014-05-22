@@ -9,6 +9,9 @@
 				  <input type="checkbox" ng-model="switchClassicalScanItem" ng-change="switchClassicalScan()" ng-false-value="" class="topcoat-switch__input">
 				  <div class="topcoat-switch__toggle"></div>
 			</label>
+			<ons-button  type="cta" ng-click="rfcommListen()" style="display: block; width: 100%;">
+			     Listen RFCOMM
+			</ons-button>
 		</div>
 	    <div class="topcoat-list" style="clear:both;">
 		    <ul class="topcoat-list__container">
@@ -19,6 +22,9 @@
 					</span>
 					<span>
 				    	DeviceAddress:{{device.deviceAddress}}
+				    </span>
+				   	<span>
+				    	Type:{{device.type}}
 				    </span>
 				    <span>
 				    	RSSI:{{device.RSSI}}

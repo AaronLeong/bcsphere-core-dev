@@ -555,23 +555,26 @@
 				navigator.bluetooth.classicalRead(readSuccess,readError,device.deviceAddress);
 			};
 			this.classicalWrite = function(device,value){
-				var writeSuccess = device.writeSuccess.bind(device.writeSuccess);
-				var writeError = device.writeError.bind(device.writeError);
-				navigator.bluetooth.classicalWrite(writeSuccess,writeError,device.deviceAddress,value);
+				var classicalWriteSuccess = device.classicalWriteSuccess.bind(device,device.classicalWriteSuccess);
+				var classicalWriteError = device.classicalWriteError.bind(device,device.classicalWriteError);
+				navigator.bluetooth.classicalWrite(classicalWriteSuccess,classicalWriteError,device.deviceAddress,value);
 			};
 			this.classicalSubscribe = function(device){
 				var subscribeCallback = device.subscribeCallback.bind(device,device.subscribeCallback);
 				navigator.bluetooth.classicalSubscribe(subscribeCallback,testFunc,device.deviceAddress);
 			};
-			this.classicalConnect = function(device){
+			this.classicalConnect = function(uuid,secure,device){
 				var connectSuccess = device.classicalConnectSuccess.bind(device,device.classicalConnectSuccess);
 				var connectError = device.classicalConnectError.bind(device,device.classicalConnectError);
-				navigator.bluetooth.classicalConnect(connectSuccess,connectError,device.deviceAddress,APPURL);
+				navigator.bluetooth.classicalConnect(connectSuccess,connectError,device.deviceAddress,APPURL,uuid,secure);
 			};
 			this.classicalDisconnect = function(device){
 				var disconnectSuccess = device.classicalDisconnectSuccess.bind(device,device.classicalDisconnectSuccess);
 				var disconnectError = device.classicalDisconnectSuccess.bind(device,device.classicalDisconnectError);
 				navigator.bluetooth.classicalDisconnect(disconnectSuccess,disconnectError,device.deviceAddress,APPURL);
+			};
+			this.rfcommListen = function(name,uuid,secure){
+				navigator.bluetooth.rfcommListen(testFunc,testFunc,name,uuid,secure);
 			};
 			
 		}else{
@@ -659,6 +662,7 @@
 			this.classicalSubscribe = this.bluetoothFuncs.classicalSubscribe;
 			this.classicalConnect = this.bluetoothFuncs.classicalConnect;
 			this.classicalDisconnect = this.bluetoothFuncs.classicalDisconnect;
+			this.rfcommListen = this.bluetoothFuncs.rfcommListen;
 			
 			this.bluetoothFuncs.initBluetooth();
 			
@@ -764,6 +768,19 @@
 	 */
 	var StartScan = BC.Bluetooth.StartScan = function(uuids){
 		BC.bluetooth.startScan(uuids);
+	};
+	
+	/** 
+	 * Starts a RFCOMM listen.
+	 * @memberof Bluetooth
+	 * @method 
+	 * @example BC.Bluetooth.RFCOMMListen("appName","7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true);
+	 * @param {string} name - Name for the SDP record when creating server socket
+	 * @param {string} uuid - Unique UUID for your application
+	 * @param {boolean} secure - use secure connect or not
+	 */
+	var RFCOMMListen = BC.Bluetooth.RFCOMMListen = function(name,uuid,secure){
+		BC.bluetooth.rfcommListen(name,uuid,secure);
 	};
 	
 	function isNewDevice(deviceAddress){
@@ -1091,15 +1108,17 @@
 		 * var device = window.device = BC.bluetooth.devices["78:C5:E5:99:26:37"];
 		 * device.classicalConnect(function(){alert("device RFCOMM is connected!");});
 		 * device.addEventListener("deviceconnected",function(s){alert("device:" + s.deviceAddress + "is connected successfully!")});
+		 * @param {string} UUID - the UUID to connect
+		 * @param {boolean} secure - secure connect or not
 		 * @param {function} successCallback - Success callback
 		 * @param {function} [errorCallback] - Error callback
 		 * @fires Device#deviceconnected
 		 * @instance
 		 */
-		classicalConnect : function(success,error){
+		classicalConnect : function(uuid,secure,success,error){
 			this.success = success;
 			this.error = error;
-			BC.bluetooth.classicalConnect(this);
+			BC.bluetooth.classicalConnect(uuid,secure,this);
 		},
 		
 		classicalConnectSuccess : function(){
@@ -1456,10 +1475,10 @@
 			}
 			BC.bluetooth.classicalWrite(this,value);
 		},
-		writeSuccess : function(){
+		classicalWriteSuccess : function(){
 			this.success(arguments);
 		},
-		writeError : function(){
+		classicalWriteError : function(){
 			this.error(arguments);
 		},
 		

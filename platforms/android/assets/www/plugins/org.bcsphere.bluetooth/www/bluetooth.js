@@ -128,40 +128,35 @@ var bluetooth = {
 	},
 	
 	startClassicalScan : function(successFunc,errorFunc){
-		alert("startClassicalScan");
-		successFunc();
-		//cordova.exec(callback,errorFunc,"BCBluetooth","startClassicalScan",[]);
+		cordova.exec(successFunc,errorFunc,"BCBluetooth","startClassicalScan",[]);
 	},
 	
 	stopClassicalScan : function(successFunc,errorFunc){
-		alert("stopClassicalScan");
-		successFunc();
-		//cordova.exec(callback,errorFunc,"BCBluetooth","stopClassicalScan",[]);
+		cordova.exec(successFunc,errorFunc,"BCBluetooth","stopClassicalScan",[]);
 	},
 	
 	classicalRead: function(successFunc,errorFunc,deviceAddress){
-		alert("read value from RFCOMM");
-    	//cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalRead", [{"deviceAddress":deviceAddress}]);
+		cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalRead", [{"deviceAddress":deviceAddress}]);
     },
     
     classicalWrite: function(successFunc,errorFunc,deviceAddress,writeValue){
-    	alert("write value to RFCOMM");
-    	//cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalWrite", [{"deviceAddress":deviceAddress,"writeValue":writeValue}]);
+    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalWrite", [{"deviceAddress":deviceAddress,"writeValue":writeValue}]);
     },
     
     classicalSubscribe: function(successFunc,errorFunc,deviceAddress){
-    	alert("classical subscribe");
-        //cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalSubscribe", [{"deviceAddress":deviceAddress}]); 
+    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalSubscribe", [{"deviceAddress":deviceAddress}]); 
     },
     
-    classicalConnect: function(successFunc,errorFunc){
-    	alert("classical connect");
-    	successFunc();
+    classicalConnect: function(successFunc,errorFunc,deviceAddress,APPURL,uuid,secure){
+    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalConnect", [{"deviceAddress":deviceAddress,"uuid":uuid,"secure":secure,"appurl":APPURL}]); 
     },
     
-    classicalDisconnect: function(successFunc,errorFunc){
-    	alert("classical disconnect");
-    	successFunc();
+    classicalDisconnect: function(successFunc,errorFunc,deviceAddress){
+    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalDisconnect", [{"deviceAddress":deviceAddress}]); 
+    },
+    
+    rfcommListen : function(successFunc,errorFunc,name,uuid,secure){
+    	cordova.exec(successFunc,errorFunc,"BCBluetooth","rfcommListen",[{"name":name,"uuid":uuid,"secure":secure}]);
     },
 };
 module.exports = bluetooth;
