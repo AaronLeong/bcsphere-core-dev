@@ -210,10 +210,10 @@ bccoredevControllers.controller('ClassicalOperationCtrl',['$scope','$location','
 			}
 		}
 		$scope.read = function(){
-			device.classicalRead(function(data){alert("classical read success! Data: " + data);});
+			device.classicalRead(function(data){alert("classical read success! Data: " + data.value.getASCIIString());});
 		}
 		$scope.subscribe = function(){
-	    	device.subscribe(function(data){alert(JSON.stringify(data.value.toString()));});
+	    	device.subscribe(function(data){alert(JSON.stringify(data.value.getASCIIString()));});
 	    }
 	}
 ]);

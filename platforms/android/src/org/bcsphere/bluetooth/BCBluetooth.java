@@ -15,6 +15,7 @@
  */
 package org.bcsphere.bluetooth;
 
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import org.apache.cordova.CallbackContext;
@@ -64,7 +65,9 @@ public class BCBluetooth extends CordovaPlugin {
     
     private BluetoothSerialService bluetoothSerialService;
     
-    StringBuffer buffer = new StringBuffer();
+    ByteBuffer buffer = ByteBuffer.allocate(2048);
+    
+    int bufferSize = 0;
 
 	public BCBluetooth() {
 	}
@@ -202,10 +205,19 @@ public class BCBluetooth extends CordovaPlugin {
 			callbackContext.success();
 		}
 		if(action.equals("classicalRead")){
-			int length = buffer.length();
-	        String data = buffer.substring(0, length);
-	        buffer.delete(0, length);
-			callbackContext.success(data);
+			byte[] data = new byte[2048];
+			byte[] predata = buffer.array();
+			for(int i = 0;i < bufferSize;i++){
+				data[i] = predata[i];
+			}
+			
+	        JSONObject obj = new JSONObject();
+			//Tools.addProperty(obj, Tools.DEVICE_ADDRESS, deviceAddress);
+			Tools.addProperty(obj, Tools.VALUE, Tools.encodeBase64(data));
+			Tools.addProperty(obj, Tools.DATE, Tools.getDateString());
+			callbackContext.success(obj);
+			bufferSize = 0;
+			buffer.clear();
 		}
 		if(action.equals("classicalSubscribe")){
             dataAvailableCallback = callbackContext;
@@ -444,10 +456,13 @@ public class BCBluetooth extends CordovaPlugin {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MESSAGE_READ:
-                   buffer.append((String)msg.obj);
-
+                	
                    if (dataAvailableCallback != null) {
-                       sendDataToSubscriber();
+                       sendDataToSubscriber((byte[])msg.obj);
+                   }else{
+                	   byte[] data = (byte[])msg.obj;
+                	   buffer.put(data);
+                	   bufferSize = bufferSize + data.length;
                    }
                    break;
                 case MESSAGE_STATE_CHANGE:
@@ -498,20 +513,15 @@ public class BCBluetooth extends CordovaPlugin {
            connectCallback = null;
        }
    }
-   private void sendDataToSubscriber() {
-		int length = buffer.length();
-        String data = buffer.substring(0, length);
-        buffer.delete(0, length);
-       if (data != null && data.length() > 0) {
+   private void sendDataToSubscriber(byte[] data) {
+       if (data != null) {
     	   JSONObject obj = new JSONObject();
     	   //Tools.addProperty(obj, Tools.DEVICE_ADDRESS, deviceAddress);
-    	   Tools.addProperty(obj, Tools.VALUE, data);
+    	   Tools.addProperty(obj, Tools.VALUE, Tools.encodeBase64(data));
     	   Tools.addProperty(obj, Tools.DATE, Tools.getDateString());
            PluginResult result = new PluginResult(PluginResult.Status.OK, obj);
            result.setKeepCallback(true);
            dataAvailableCallback.sendPluginResult(result);
-
-           sendDataToSubscriber();
        }
    }
 }

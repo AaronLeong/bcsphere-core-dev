@@ -440,15 +440,17 @@ public class BluetoothSerialService {
 
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
-            byte[] buffer = new byte[1024];
-            int bytes;
-
+            byte[] buffer = new byte[2048];
+            int byteNum;
             // Keep listening to the InputStream while connected
             while (true) {
                 try {
                     // Read from the InputStream
-                    bytes = mmInStream.read(buffer);
-                    String data = new String(buffer, 0, bytes);
+                	byteNum = mmInStream.read(buffer);
+                	byte[] data = new byte[byteNum];
+                	for(int i = 0;i < byteNum;i++){
+                		data[i] = buffer[i];
+                	}
                     
                     // Send the new data String to the UI Activity
                     mHandler.obtainMessage(BCBluetooth.MESSAGE_READ, data).sendToTarget();
