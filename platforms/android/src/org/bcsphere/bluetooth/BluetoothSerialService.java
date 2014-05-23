@@ -5,9 +5,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
+import org.apache.cordova.CallbackContext;
+import org.apache.cordova.PluginResult;
 import org.bcsphere.bluetooth.tools.Tools;
+import org.json.JSONObject;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -50,14 +54,75 @@ public class BluetoothSerialService {
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
 
+    public static final int MESSAGE_STATE_CHANGE = 1;
+    public static final int MESSAGE_READ = 2;
+    public static final int MESSAGE_WRITE = 3;
+    public static final int MESSAGE_DEVICE_NAME = 4;
+    public static final int MESSAGE_TOAST = 5;
+    
+    public static final String TOAST = "toast";
+    
+    public CallbackContext connectCallback;
+    public CallbackContext dataAvailableCallback;
+    
+    ByteBuffer buffer = ByteBuffer.allocate(2048);
+    int bufferSize = 0;
+    
     /**
      * Constructor. Prepares a new BluetoothSerial session.
      * @param handler  A Handler to send messages back to the UI Activity
      */
-    public BluetoothSerialService(Handler handler) {
+    public BluetoothSerialService(String deviceAddress) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
-        mHandler = handler;
+        mHandler = new Handler() {
+
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MESSAGE_READ:
+                    	
+                       if (dataAvailableCallback != null) {
+                           sendDataToSubscriber((byte[])msg.obj);
+                       }else{
+                    	   byte[] data = (byte[])msg.obj;
+                    	   buffer.put(data);
+                    	   bufferSize = bufferSize + data.length;
+                       }
+                       break;
+                    case MESSAGE_STATE_CHANGE:
+
+                       //if(D) Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
+                       switch (msg.arg1) {
+                           case BluetoothSerialService.STATE_CONNECTED:
+                               Log.i("BluetoothSerial", "BluetoothSerialService.STATE_CONNECTED");
+                               notifyConnectionSuccess();
+                               break;
+                           case BluetoothSerialService.STATE_CONNECTING:
+                               Log.i("BluetoothSerial", "BluetoothSerialService.STATE_CONNECTING");
+                               break;
+                           case BluetoothSerialService.STATE_LISTEN:
+                               Log.i("BluetoothSerial", "BluetoothSerialService.STATE_LISTEN");
+                               break;
+                           case BluetoothSerialService.STATE_NONE:
+                               Log.i("BluetoothSerial", "BluetoothSerialService.STATE_NONE");
+                               break;
+                       }
+                       break;
+                   case MESSAGE_WRITE:
+                       //  byte[] writeBuf = (byte[]) msg.obj;
+                       //  String writeMessage = new String(writeBuf);
+                       //  Log.i(TAG, "Wrote: " + writeMessage);
+                       break;
+                   case MESSAGE_DEVICE_NAME:
+                       //Log.i(TAG, msg.getData().getString(DEVICE_NAME));
+                       break;
+                   case MESSAGE_TOAST:
+                       String message = msg.getData().getString(TOAST);
+                       notifyConnectionLost(message);
+                       break;
+                }
+            }
+       };
     }
 
     /**
@@ -69,7 +134,7 @@ public class BluetoothSerialService {
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
-        mHandler.obtainMessage(BCBluetooth.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+        mHandler.obtainMessage(MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
     }
 
     /**
@@ -81,7 +146,7 @@ public class BluetoothSerialService {
     /**
      * Start the chat service. Specifically start AcceptThread to begin a
      * session in listening (server) mode. Called by the Activity onResume() */
-    public synchronized void listen(String name,String uuidstr,boolean secure) {
+    public synchronized void listen(String name,String uuidstr,boolean secure, BCBluetooth bcbluetooth) {
         if (D) Log.d(TAG, "startListen");
         UUID uuid = UUID.fromString(uuidstr);
         // Cancel any thread attempting to make a connection
@@ -97,7 +162,7 @@ public class BluetoothSerialService {
         
         // Start the thread to listen on a BluetoothServerSocket
         if (mSecureAcceptThread == null) {
-            mSecureAcceptThread = new AcceptThread(name,uuid,true);
+            mSecureAcceptThread = new AcceptThread(name,uuid,true,bcbluetooth,this);
             mSecureAcceptThread.start();
         }
     }
@@ -149,7 +214,7 @@ public class BluetoothSerialService {
         mConnectedThread.start();
 
         // Send the name of the connected device back to the UI Activity
-        Message msg = mHandler.obtainMessage(BCBluetooth.MESSAGE_DEVICE_NAME);
+        Message msg = mHandler.obtainMessage(MESSAGE_DEVICE_NAME);
         Bundle bundle = new Bundle();
         bundle.putString(Tools.DEVICE_NAME, device.getName());
         msg.setData(bundle);
@@ -203,9 +268,9 @@ public class BluetoothSerialService {
      */
     private void connectionFailed() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(BCBluetooth.MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(MESSAGE_TOAST);
         Bundle bundle = new Bundle();
-        bundle.putString(BCBluetooth.TOAST, "Unable to connect to device");
+        bundle.putString(TOAST, "Unable to connect to device");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
@@ -218,9 +283,9 @@ public class BluetoothSerialService {
      */
     private void connectionLost() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(BCBluetooth.MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(MESSAGE_TOAST);
         Bundle bundle = new Bundle();
-        bundle.putString(BCBluetooth.TOAST, "Device connection was lost");
+        bundle.putString(TOAST, "Device connection was lost");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
@@ -237,10 +302,14 @@ public class BluetoothSerialService {
         // The local server socket
         private final BluetoothServerSocket mmServerSocket;
         private String mSocketType;
+        private BCBluetooth bcbluetooth;
+        private BluetoothSerialService service;
 
-        public AcceptThread(String name,UUID uuid,boolean secure) {
+        public AcceptThread(String name,UUID uuid,boolean secure,BCBluetooth bluetooth,BluetoothSerialService serialService) {
             BluetoothServerSocket tmp = null;
             mSocketType = secure ? "Secure":"Insecure";
+            bcbluetooth = bluetooth;
+            service = serialService;
 
             // Create a new listening server socket
             try {
@@ -278,9 +347,9 @@ public class BluetoothSerialService {
                         switch (mState) {
                             case STATE_LISTEN:
                             case STATE_CONNECTING:
+                            	bcbluetooth.classicalServices.put(socket.getRemoteDevice().getAddress(),service);
                                 // Situation normal. Start the connected thread.
-                                connected(socket, socket.getRemoteDevice(),
-                                        mSocketType);
+                                connected(socket, socket.getRemoteDevice(),mSocketType);
                                 break;
                             case STATE_NONE:
                             case STATE_CONNECTED:
@@ -453,7 +522,7 @@ public class BluetoothSerialService {
                 	}
                     
                     // Send the new data String to the UI Activity
-                    mHandler.obtainMessage(BCBluetooth.MESSAGE_READ, data).sendToTarget();
+                    mHandler.obtainMessage(MESSAGE_READ, data).sendToTarget();
 
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
@@ -474,7 +543,7 @@ public class BluetoothSerialService {
                 mmOutStream.write(buffer);
 
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(BCBluetooth.MESSAGE_WRITE, -1, -1, buffer).sendToTarget();
+                mHandler.obtainMessage(MESSAGE_WRITE, -1, -1, buffer).sendToTarget();
 
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
@@ -489,4 +558,30 @@ public class BluetoothSerialService {
             }
         }
     }
+    
+    private void notifyConnectionSuccess() {
+        if (connectCallback != null) {
+            PluginResult result = new PluginResult(PluginResult.Status.OK);
+            result.setKeepCallback(true);
+            connectCallback.sendPluginResult(result);
+        }
+    }
+    private void notifyConnectionLost(String error) {
+        if (connectCallback != null) {
+            connectCallback.error(error);
+            connectCallback = null;
+        }
+    }
+    private void sendDataToSubscriber(byte[] data) {
+        if (data != null) {
+     	   JSONObject obj = new JSONObject();
+     	   //Tools.addProperty(obj, Tools.DEVICE_ADDRESS, deviceAddress);
+     	   Tools.addProperty(obj, Tools.VALUE, Tools.encodeBase64(data));
+     	   Tools.addProperty(obj, Tools.DATE, Tools.getDateString());
+            PluginResult result = new PluginResult(PluginResult.Status.OK, obj);
+            result.setKeepCallback(true);
+            dataAvailableCallback.sendPluginResult(result);
+        }
+    }
+    
 }

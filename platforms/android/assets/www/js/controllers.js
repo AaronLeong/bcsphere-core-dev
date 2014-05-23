@@ -215,5 +215,10 @@ bccoredevControllers.controller('ClassicalOperationCtrl',['$scope','$location','
 		$scope.subscribe = function(){
 	    	device.subscribe(function(data){alert(JSON.stringify(data.value.getASCIIString()));});
 	    }
+	    
+	    $scope.rfcommListen = function(){
+			BC.Bluetooth.RFCOMMListen("listenName","7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true);
+			alert("rfcomm listen start successfully.");
+		};
 	}
 ]);

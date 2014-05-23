@@ -15,11 +15,9 @@
  */
 package org.bcsphere.bluetooth;
 
-import java.nio.ByteBuffer;
-import java.util.UUID;
+import java.util.HashMap;
 
 import org.apache.cordova.CallbackContext;
-import org.apache.cordova.CordovaArgs;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
@@ -35,9 +33,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 
 import org.bcsphere.bluetooth.tools.BluetoothDetection;
 import org.bcsphere.bluetooth.tools.Tools;
@@ -51,23 +46,10 @@ public class BCBluetooth extends CordovaPlugin {
 	private String versionOfAPI;
 	private CallbackContext newadvpacketContext;
 	private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-	
-    public static final int MESSAGE_STATE_CHANGE = 1;
-    public static final int MESSAGE_READ = 2;
-    public static final int MESSAGE_WRITE = 3;
-    public static final int MESSAGE_DEVICE_NAME = 4;
-    public static final int MESSAGE_TOAST = 5;
     
-    public static final String TOAST = "toast";
-    
-    private CallbackContext connectCallback;
-    private CallbackContext dataAvailableCallback;
-    
-    private BluetoothSerialService bluetoothSerialService;
-    
-    ByteBuffer buffer = ByteBuffer.allocate(2048);
-    
-    int bufferSize = 0;
+	//classical interface relative data structure
+	public HashMap<String, BluetoothSerialService> classicalServices = new HashMap<String, BluetoothSerialService>();
+
 
 	public BCBluetooth() {
 	}
@@ -106,10 +88,6 @@ public class BCBluetooth extends CordovaPlugin {
 	@Override
 	public boolean execute(final String action, final JSONArray json,
 			final CallbackContext callbackContext) throws JSONException {
-		
-        if (bluetoothSerialService == null) {
-            bluetoothSerialService = new BluetoothSerialService(mHandler);
-        }
 
 		if (action.equals("addEventListener")) {
 			String eventName = Tools.getData(json, Tools.EVENT_NAME);
@@ -182,12 +160,38 @@ public class BCBluetooth extends CordovaPlugin {
 			}
 		}
 		if(action.equals("classicalConnect")){
-			connect(json, callbackContext);
+	    	String deviceAddress = Tools.getData(json, Tools.DEVICE_ADDRESS);
+	    	String securestr = Tools.getData(json, Tools.SECURE);
+	    	String uuidstr = Tools.getData(json, Tools.UUID);
+	    	boolean secure = false;
+	    	if(securestr.equals("true")){
+	    		secure = true;
+	    	}
+	    	System.out.println("connect to "+deviceAddress);
+	        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceAddress);
+	        BluetoothSerialService classicalService = classicalServices.get(deviceAddress);
+	        
+	        if(classicalService == null){
+	        	classicalServices.put(deviceAddress, new BluetoothSerialService(deviceAddress));
+	        }
+	        
+	        if (device != null && classicalService != null) {
+	        	classicalService.connectCallback = callbackContext;
+	        	classicalService.connect(device,uuidstr,secure);
+	        } else {
+	            callbackContext.error("Could not connect to " + deviceAddress);
+	        }
 		}
 		if (action.equals("classicalDisconnect")) {
-            connectCallback = null;
-            bluetoothSerialService.stop();
-            callbackContext.success();
+			String deviceAddress = Tools.getData(json, Tools.DEVICE_ADDRESS);
+			BluetoothSerialService service = classicalServices.get(deviceAddress);
+			if(service != null){
+				service.connectCallback = null;
+				service.stop();
+				callbackContext.success();
+			}else{
+				callbackContext.error("Could not disconnect to " + deviceAddress);
+			}
         }
 		if(action.equals("rfcommListen")){
 			String name = Tools.getData(json, Tools.NAME);
@@ -197,30 +201,49 @@ public class BCBluetooth extends CordovaPlugin {
 	    	if(securestr.equals("true")){
 	    		secure = true;
 	    	}
-			bluetoothSerialService.listen(name, uuidstr, secure);
+	    	BluetoothSerialService service = new BluetoothSerialService("dummyAddress");
+	    	service.listen(name, uuidstr, secure, this);
 		}
 		if(action.equals("classicalWrite")){
-			String data = Tools.getData(json, Tools.WRITE_VALUE);
-			bluetoothSerialService.write(Tools.decodeBase64(data));
-			callbackContext.success();
+			String deviceAddress = Tools.getData(json, Tools.DEVICE_ADDRESS);
+			BluetoothSerialService service = classicalServices.get(deviceAddress);
+			if(service != null){
+				String data = Tools.getData(json, Tools.WRITE_VALUE);
+				service.write(Tools.decodeBase64(data));
+				callbackContext.success();
+			}else{
+				callbackContext.error("there is no connection on device:" + deviceAddress);
+			}
 		}
 		if(action.equals("classicalRead")){
-			byte[] data = new byte[2048];
-			byte[] predata = buffer.array();
-			for(int i = 0;i < bufferSize;i++){
-				data[i] = predata[i];
+			String deviceAddress = Tools.getData(json, Tools.DEVICE_ADDRESS);
+			BluetoothSerialService service = classicalServices.get(deviceAddress);
+			if(service != null){
+				byte[] data = new byte[2048];
+				byte[] predata = service.buffer.array();
+				for(int i = 0;i < service.bufferSize;i++){
+					data[i] = predata[i];
+				}
+				
+		        JSONObject obj = new JSONObject();
+				//Tools.addProperty(obj, Tools.DEVICE_ADDRESS, deviceAddress);
+				Tools.addProperty(obj, Tools.VALUE, Tools.encodeBase64(data));
+				Tools.addProperty(obj, Tools.DATE, Tools.getDateString());
+				callbackContext.success(obj);
+				service.bufferSize = 0;
+				service.buffer.clear();
+			}else{
+				callbackContext.error("there is no connection on device:" + deviceAddress);
 			}
-			
-	        JSONObject obj = new JSONObject();
-			//Tools.addProperty(obj, Tools.DEVICE_ADDRESS, deviceAddress);
-			Tools.addProperty(obj, Tools.VALUE, Tools.encodeBase64(data));
-			Tools.addProperty(obj, Tools.DATE, Tools.getDateString());
-			callbackContext.success(obj);
-			bufferSize = 0;
-			buffer.clear();
 		}
 		if(action.equals("classicalSubscribe")){
-            dataAvailableCallback = callbackContext;
+			String deviceAddress = Tools.getData(json, Tools.DEVICE_ADDRESS);
+			BluetoothSerialService service = classicalServices.get(deviceAddress);
+			if(service != null){
+				service.dataAvailableCallback = callbackContext;
+			}else{
+				callbackContext.error("there is no connection on device:" + deviceAddress);
+			}
 		}
 		if (!Tools.isOpenBluetooth()) {
 			Tools.sendErrorMsg(callbackContext);
@@ -431,97 +454,5 @@ public class BCBluetooth extends CordovaPlugin {
 	        }
 		}
 	};
-	
-    private void connect(JSONArray json, CallbackContext callbackContext) throws JSONException {
-    	String deviceAddress = Tools.getData(json, Tools.DEVICE_ADDRESS);
-    	String securestr = Tools.getData(json, Tools.SECURE);
-    	String uuidstr = Tools.getData(json, Tools.UUID);
-    	boolean secure = false;
-    	if(securestr.equals("true")){
-    		secure = true;
-    	}
-    	System.out.println("connect to "+deviceAddress);
-        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceAddress);
 
-        if (device != null) {
-            connectCallback = callbackContext;
-            bluetoothSerialService.connect(device,uuidstr,secure);
-        } else {
-            callbackContext.error("Could not connect to " + deviceAddress);
-        }
-    }
-
-    private final Handler mHandler = new Handler() {
-
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MESSAGE_READ:
-                	
-                   if (dataAvailableCallback != null) {
-                       sendDataToSubscriber((byte[])msg.obj);
-                   }else{
-                	   byte[] data = (byte[])msg.obj;
-                	   buffer.put(data);
-                	   bufferSize = bufferSize + data.length;
-                   }
-                   break;
-                case MESSAGE_STATE_CHANGE:
-
-                   //if(D) Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
-                   switch (msg.arg1) {
-                       case BluetoothSerialService.STATE_CONNECTED:
-                           Log.i("BluetoothSerial", "BluetoothSerialService.STATE_CONNECTED");
-                           notifyConnectionSuccess();
-                           break;
-                       case BluetoothSerialService.STATE_CONNECTING:
-                           Log.i("BluetoothSerial", "BluetoothSerialService.STATE_CONNECTING");
-                           break;
-                       case BluetoothSerialService.STATE_LISTEN:
-                           Log.i("BluetoothSerial", "BluetoothSerialService.STATE_LISTEN");
-                           break;
-                       case BluetoothSerialService.STATE_NONE:
-                           Log.i("BluetoothSerial", "BluetoothSerialService.STATE_NONE");
-                           break;
-                   }
-                   break;
-               case MESSAGE_WRITE:
-                   //  byte[] writeBuf = (byte[]) msg.obj;
-                   //  String writeMessage = new String(writeBuf);
-                   //  Log.i(TAG, "Wrote: " + writeMessage);
-                   break;
-               case MESSAGE_DEVICE_NAME:
-                   //Log.i(TAG, msg.getData().getString(DEVICE_NAME));
-                   break;
-               case MESSAGE_TOAST:
-                   String message = msg.getData().getString(TOAST);
-                   notifyConnectionLost(message);
-                   break;
-            }
-        }
-   };
-   
-   private void notifyConnectionSuccess() {
-       if (connectCallback != null) {
-           PluginResult result = new PluginResult(PluginResult.Status.OK);
-           result.setKeepCallback(true);
-           connectCallback.sendPluginResult(result);
-       }
-   }
-   private void notifyConnectionLost(String error) {
-       if (connectCallback != null) {
-           connectCallback.error(error);
-           connectCallback = null;
-       }
-   }
-   private void sendDataToSubscriber(byte[] data) {
-       if (data != null) {
-    	   JSONObject obj = new JSONObject();
-    	   //Tools.addProperty(obj, Tools.DEVICE_ADDRESS, deviceAddress);
-    	   Tools.addProperty(obj, Tools.VALUE, Tools.encodeBase64(data));
-    	   Tools.addProperty(obj, Tools.DATE, Tools.getDateString());
-           PluginResult result = new PluginResult(PluginResult.Status.OK, obj);
-           result.setKeepCallback(true);
-           dataAvailableCallback.sendPluginResult(result);
-       }
-   }
 }
