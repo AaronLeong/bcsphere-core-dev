@@ -549,29 +549,29 @@
 			this.stopClassicalScan = function(){
 				navigator.bluetooth.stopClassicalScan(testFunc,testFunc);
 			};
-			this.classicalRead = function(device){
+			this.rfcommRead = function(device){
 				var readSuccess = device.readSuccess.bind(device,device.readSuccess);
 				var readError = device.readError.bind(device,device.readError);
-				navigator.bluetooth.classicalRead(readSuccess,readError,device.deviceAddress);
+				navigator.bluetooth.rfcommRead(readSuccess,readError,device.deviceAddress);
 			};
-			this.classicalWrite = function(device,value){
-				var classicalWriteSuccess = device.classicalWriteSuccess.bind(device,device.classicalWriteSuccess);
-				var classicalWriteError = device.classicalWriteError.bind(device,device.classicalWriteError);
-				navigator.bluetooth.classicalWrite(classicalWriteSuccess,classicalWriteError,device.deviceAddress,value);
+			this.rfcommWrite = function(device,value){
+				var rfcommWriteSuccess = device.rfcommWriteSuccess.bind(device,device.rfcommWriteSuccess);
+				var rfcommWriteError = device.rfcommWriteError.bind(device,device.rfcommWriteError);
+				navigator.bluetooth.rfcommWrite(rfcommWriteSuccess,rfcommWriteError,device.deviceAddress,value);
 			};
-			this.classicalSubscribe = function(device){
+			this.rfcommSubscribe = function(device){
 				var subscribeCallback = device.subscribeCallback.bind(device,device.subscribeCallback);
-				navigator.bluetooth.classicalSubscribe(subscribeCallback,testFunc,device.deviceAddress);
+				navigator.bluetooth.rfcommSubscribe(subscribeCallback,testFunc,device.deviceAddress);
 			};
-			this.classicalConnect = function(uuid,secure,device){
-				var connectSuccess = device.classicalConnectSuccess.bind(device,device.classicalConnectSuccess);
-				var connectError = device.classicalConnectError.bind(device,device.classicalConnectError);
-				navigator.bluetooth.classicalConnect(connectSuccess,connectError,device.deviceAddress,APPURL,uuid,secure);
+			this.rfcommConnect = function(uuid,secure,device){
+				var connectSuccess = device.rfcommConnectSuccess.bind(device,device.rfcommConnectSuccess);
+				var connectError = device.rfcommConnectError.bind(device,device.rfcommConnectError);
+				navigator.bluetooth.rfcommConnect(connectSuccess,connectError,device.deviceAddress,APPURL,uuid,secure);
 			};
-			this.classicalDisconnect = function(device){
-				var disconnectSuccess = device.classicalDisconnectSuccess.bind(device,device.classicalDisconnectSuccess);
-				var disconnectError = device.classicalDisconnectSuccess.bind(device,device.classicalDisconnectError);
-				navigator.bluetooth.classicalDisconnect(disconnectSuccess,disconnectError,device.deviceAddress,APPURL);
+			this.rfcommDisconnect = function(device){
+				var disconnectSuccess = device.rfcommDisconnectSuccess.bind(device,device.rfcommDisconnectSuccess);
+				var disconnectError = device.rfcommDisconnectSuccess.bind(device,device.rfcommDisconnectError);
+				navigator.bluetooth.rfcommDisconnect(disconnectSuccess,disconnectError,device.deviceAddress,APPURL);
 			};
 			this.rfcommListen = function(name,uuid,secure){
 				navigator.bluetooth.rfcommListen(testFunc,testFunc,name,uuid,secure);
@@ -657,11 +657,11 @@
 			//classical Bluetooth 2.1 interface
 			this.startClassicalScan = this.bluetoothFuncs.startClassicalScan;
 			this.stopClassicalScan = this.bluetoothFuncs.stopClassicalScan;
-			this.classicalRead = this.bluetoothFuncs.classicalRead;
-			this.classicalWrite = this.bluetoothFuncs.classicalWrite;
-			this.classicalSubscribe = this.bluetoothFuncs.classicalSubscribe;
-			this.classicalConnect = this.bluetoothFuncs.classicalConnect;
-			this.classicalDisconnect = this.bluetoothFuncs.classicalDisconnect;
+			this.rfcommRead = this.bluetoothFuncs.rfcommRead;
+			this.rfcommWrite = this.bluetoothFuncs.rfcommWrite;
+			this.rfcommSubscribe = this.bluetoothFuncs.rfcommSubscribe;
+			this.rfcommConnect = this.bluetoothFuncs.rfcommConnect;
+			this.rfcommDisconnect = this.bluetoothFuncs.rfcommDisconnect;
 			this.rfcommListen = this.bluetoothFuncs.rfcommListen;
 			
 			this.bluetoothFuncs.initBluetooth();
@@ -759,15 +759,57 @@
 		});
 	};
 	/** 
-	 * Starts a scan for Bluetooth LE devices, looking for devices with given services.
+	 * Starts a scan for Bluetooth LE OR Classical(only in android platform) devices.
 	 * @memberof Bluetooth
 	 * @method 
-	 * @example BC.Bluetooth.StartScan();
-	 * @param {array} [uuids] - Array of services to look for. If null or [], it will scan all devices
+	 * @example BC.Bluetooth.StartScan();//start hybrid scan,in android platform the default scan strategy is scan for BLE device 5s first,
+	 * then scan for classical device 12s,and restart the hybrid scan untill the BC.Bluetooth.StopScan be called. in IOS platform only start the LE scan.
+	 * BC.Bluetooth.StartScan(null,["00000000-0000-0000-0000-000000000000"]);//start hybrid scan with LE service UUID.
+	 * BC.Bluetooth.StartScan("LE"); //just start the LE scan
+	 * BC.Bluetooth.StartScan("Classical"); //just start the classical scan in android platform, if the platform is IOS,call this method will nothing happen.
+	 * @param {array} [type] - Is LE scan or classical scan, please input "LE" OR "Classical", if you want use default scan strategy, just ignore this param.
+	 * @param {array} [uuids] - Array of services to look for. If null or [], it will scan all devices(just support BLE service UUID)
 	 * @fires Bluetooth#newdevice
 	 */
-	var StartScan = BC.Bluetooth.StartScan = function(uuids){
+	var StartScan = BC.Bluetooth.StartScan = function(type,uuids){
+		if(type){
+			var type = type.toLowerCase();
+			if(type == "le"){
+				BC.bluetooth.startScan(uuids);
+			}else if(type == "classical"){
+				if(API !== "ios"){
+					BC.bluetooth.startClassicalScan();
+				}else{
+					alert("classical scan is not support in IOS platform.");
+				}
+			}else{
+				alert("please input 'LE' or 'Classical' string for type.");
+			}
+		}else{
+			startDefaultScan(uuids);
+		}
+	};
+	
+	function startDefaultScan(uuids){
+		if(API == "ios"){
+			BC.bluetooth.startScan(uuids);
+		}else{
+			startDefaultScanImpl(uuids);
+			BC.bluetooth.scanIntervalIndex = setInterval(function(){
+				startDefaultScanImpl(uuids);
+			},17100);
+		}
+	};
+	
+	function startDefaultScanImpl(uuids){
 		BC.bluetooth.startScan(uuids);
+		setTimeout(function(){
+			BC.bluetooth.stopScan(uuids);
+			BC.bluetooth.startClassicalScan();
+		},5000);
+		setTimeout(function(){
+			BC.bluetooth.stopClassicalScan();
+		},17000);
 	};
 	
 	/** 
@@ -794,34 +836,20 @@
 	};
 	
 	/** 
-	 * Stops a scanning for BLE Peripherals.
+	 * Stops a scanning.
 	 * @memberof Bluetooth
 	 * @method 
 	 * @example BC.Bluetooth.StopScan();
 	 */
 	var StopScan = BC.Bluetooth.StopScan = function(){
 		BC.bluetooth.stopScan();
-	};
-	
-	/** 
-	 * Starts a classical scan(Bluetooth 2.1) for Bluetooth devices, the device will also push into the BC.bluetooth.devices array.
-	 * @memberof Bluetooth
-	 * @method 
-	 * @example BC.Bluetooth.StartClassicalScan();
-	 * @fires Bluetooth#newdevice
-	 */                                   
-	var StartClassicalScan = BC.Bluetooth.StartClassicalScan = function(){
-		BC.bluetooth.startClassicalScan();
-	};
+		if(API !== "ios"){
+			BC.bluetooth.stopClassicalScan();
+		}
+		if(BC.bluetooth.scanIntervalIndex){
 
-	/** 
-	 * Stops classical scan(Bluetooth 2.1) for Bluetooth devices.
-	 * @memberof Bluetooth
-	 * @method 
-	 * @example BC.Bluetooth.StopClassicalScan();
-	 */
-	var StopClassicalScan = BC.Bluetooth.StopClassicalScan = function(){
-		BC.bluetooth.stopClassicalScan();
+			clearInterval(BC.bluetooth.scanIntervalIndex);
+		}
 	};
 	
 	/** 
@@ -1106,7 +1134,7 @@
 		 * @memberof Device
 		 * @example //Gets a the Device instance.
 		 * var device = window.device = BC.bluetooth.devices["78:C5:E5:99:26:37"];
-		 * device.classicalConnect(function(){alert("device RFCOMM is connected!");});
+		 * device.rfcommConnect(function(){alert("device RFCOMM is connected!");});
 		 * device.addEventListener("deviceconnected",function(s){alert("device:" + s.deviceAddress + "is connected successfully!")});
 		 * @param {string} UUID - the UUID to connect
 		 * @param {boolean} secure - secure connect or not
@@ -1115,19 +1143,19 @@
 		 * @fires Device#deviceconnected
 		 * @instance
 		 */
-		classicalConnect : function(uuid,secure,success,error){
+		rfcommConnect : function(uuid,secure,success,error){
 			this.success = success;
 			this.error = error;
-			BC.bluetooth.classicalConnect(uuid,secure,this);
+			BC.bluetooth.rfcommConnect(uuid,secure,this);
 		},
 		
-		classicalConnectSuccess : function(){
+		rfcommConnectSuccess : function(){
 			this.isConnected = true;
 			this.dispatchEvent("deviceconnected");
 			this.success();
 		},
 		
-		classicalConnectError : function(){
+		rfcommConnectError : function(){
 			this.error();
 		},
 		
@@ -1241,23 +1269,23 @@
 		/**
 		 * Disconnects a RFCOMM peripheral.
 		 * @memberof Device
-		 * @example device.classicalDisconnect();
+		 * @example device.rfcommDisconnect();
 		 * @param {function} [successCallback] - Success callback
 		 * @param {function} [errorCallback] - Error callback
 		 * @instance
 		 */		
-		classicalDisconnect : function(success,error){
+		rfcommDisconnect : function(success,error){
 			this.success = success;
 			this.error = error;
-			BC.bluetooth.classicalDisconnect(this);
+			BC.bluetooth.rfcommDisconnect(this);
 		},
 		
-		classicalDisconnectSuccess : function(){
+		rfcommDisconnectSuccess : function(){
 			this.isConnected = false;
 			this.success();
 		},
 		
-		classicalDisconnectError : function(){
+		rfcommDisconnectError : function(){
 			this.error();
 		},
 		
@@ -1415,8 +1443,8 @@
 		 * Reads value from classical RFCOMM interface.(only support Bluetooth2.1 device)
 		 * @memberof Device
 		 * @example 
-		 * device.classicalConnect(function(){
-		 *	device.classicalRead(readSuccess);
+		 * device.rfcommConnect(function(){
+		 *	device.rfcommRead(readSuccess);
 		 * });
 		 * function readSuccess(data){
 		 *	alert("Data : "+JSON.stringify(data.value)+" \n Time :"+data.date);
@@ -1425,10 +1453,10 @@
 		 * @param {function} [errorCallback] - Error callback
 		 * @instance
 		 */
-		classicalRead : function(success,error){
+		rfcommRead : function(success,error){
 			this.success = success;
 			this.error = error;
-			BC.bluetooth.classicalRead(this);
+			BC.bluetooth.rfcommRead(this);
 		},
 		readSuccess : function(){
 			var data = {};
@@ -1446,8 +1474,8 @@
 		 * @memberof Device
 		 * @example 
 		 * //write after device is well prepared.
-		 * device.classicalConnect(function(){
-		 *	device.classicalWrite("Hex","01",writeSuccess);
+		 * device.rfcommConnect(function(){
+		 *	device.rfcommWrite("Hex","01",writeSuccess);
 		 * });
 		 * function writeSuccess(data){
 		 *	alert("write success!");
@@ -1458,7 +1486,7 @@
 		 * @param {function} [errorCallback] - Error callback
 		 * @instance
 		 */
-		classicalWrite : function(type,value,success,error){
+		rfcommWrite : function(type,value,success,error){
 			this.success = success;
 			this.error = error;
 			if(type.toLowerCase() == "hex"){
@@ -1473,12 +1501,12 @@
 				error("Please input 'hex'/'ascii'/'unicode' type.");
 				return;
 			}
-			BC.bluetooth.classicalWrite(this,value);
+			BC.bluetooth.rfcommWrite(this,value);
 		},
-		classicalWriteSuccess : function(){
+		rfcommWriteSuccess : function(){
 			this.success(arguments);
 		},
-		classicalWriteError : function(){
+		rfcommWriteError : function(){
 			this.error(arguments);
 		},
 		
@@ -1496,9 +1524,9 @@
 		 * @param {function} callback - Called when peripheral sends data to this device.
 		 * @instance
 		 */
-		subscribe : function(callback){
+		rfcommSubscribe : function(callback){
 			this.callback = callback;
-			BC.bluetooth.classicalSubscribe(this);
+			BC.bluetooth.rfcommSubscribe(this);
 		},
 		subscribeCallback : function(){
 			var obj = arguments[1];

@@ -159,7 +159,7 @@ public class BCBluetooth extends CordovaPlugin {
 				callbackContext.error("your bluetooth is not open!");
 			}
 		}
-		if(action.equals("classicalConnect")){
+		if(action.equals("rfcommConnect")){
 	    	String deviceAddress = Tools.getData(json, Tools.DEVICE_ADDRESS);
 	    	String securestr = Tools.getData(json, Tools.SECURE);
 	    	String uuidstr = Tools.getData(json, Tools.UUID);
@@ -182,12 +182,13 @@ public class BCBluetooth extends CordovaPlugin {
 	            callbackContext.error("Could not connect to " + deviceAddress);
 	        }
 		}
-		if (action.equals("classicalDisconnect")) {
+		if (action.equals("rfcommDisconnect")) {
 			String deviceAddress = Tools.getData(json, Tools.DEVICE_ADDRESS);
 			BluetoothSerialService service = classicalServices.get(deviceAddress);
 			if(service != null){
 				service.connectCallback = null;
 				service.stop();
+				classicalServices.remove(deviceAddress);
 				callbackContext.success();
 			}else{
 				callbackContext.error("Could not disconnect to " + deviceAddress);
@@ -204,7 +205,7 @@ public class BCBluetooth extends CordovaPlugin {
 	    	BluetoothSerialService service = new BluetoothSerialService("dummyAddress");
 	    	service.listen(name, uuidstr, secure, this);
 		}
-		if(action.equals("classicalWrite")){
+		if(action.equals("rfcommWrite")){
 			String deviceAddress = Tools.getData(json, Tools.DEVICE_ADDRESS);
 			BluetoothSerialService service = classicalServices.get(deviceAddress);
 			if(service != null){
@@ -215,7 +216,7 @@ public class BCBluetooth extends CordovaPlugin {
 				callbackContext.error("there is no connection on device:" + deviceAddress);
 			}
 		}
-		if(action.equals("classicalRead")){
+		if(action.equals("rfcommRead")){
 			String deviceAddress = Tools.getData(json, Tools.DEVICE_ADDRESS);
 			BluetoothSerialService service = classicalServices.get(deviceAddress);
 			if(service != null){
@@ -236,7 +237,7 @@ public class BCBluetooth extends CordovaPlugin {
 				callbackContext.error("there is no connection on device:" + deviceAddress);
 			}
 		}
-		if(action.equals("classicalSubscribe")){
+		if(action.equals("rfcommSubscribe")){
 			String deviceAddress = Tools.getData(json, Tools.DEVICE_ADDRESS);
 			BluetoothSerialService service = classicalServices.get(deviceAddress);
 			if(service != null){

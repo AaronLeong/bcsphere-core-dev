@@ -12,21 +12,29 @@ bccoredevControllers.controller('DeviceListCtrl',["$scope",'$location',function(
 			$scope.devices = BC.bluetooth.devices;
 		},false);
 	}
-	setInterval(function(){$scope.$apply();},100);
+	setInterval(function(){$scope.$apply();},500);
 
 	$scope.switchScan = function(){
 		if($scope.switchScanItem){
-			BC.Bluetooth.StartScan();
+			BC.bluetooth.startScan();
 		}else{
-			BC.Bluetooth.StopScan();
+			BC.bluetooth.stopScan();
 		}
 	};
 	
 	$scope.switchClassicalScan = function(){
 		if($scope.switchClassicalScanItem){
-			BC.Bluetooth.StartClassicalScan();
+			BC.bluetooth.startClassicalScan();
 		}else{
-			BC.Bluetooth.StopClassicalScan();
+			BC.bluetooth.stopClassicalScan();
+		}
+	};
+	
+	$scope.switchHybridScan = function(){
+		if($scope.switchHybridScanItem){
+			BC.Bluetooth.StartScan();
+		}else{
+			BC.Bluetooth.StopScan();
 		}
 	};
 
@@ -190,30 +198,30 @@ bccoredevControllers.controller('ClassicalOperationCtrl',['$scope','$location','
 			$scope.connect_button_show = true;
 		}
 		
-		$scope.classicalConnect = function(){
-			device.classicalConnect("7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true,function(){
+		$scope.rfcommConnect = function(){
+			device.rfcommConnect("7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true,function(){
 				$scope.connect_button_show = false;
 				$scope.disconnect_button_show = true;
 			},function(){
 				alert("connect failed!");
 			});
 		}
-		$scope.classicalDisconnect = function(){
-			device.classicalDisconnect(function(){
+		$scope.rfcommDisconnect = function(){
+			device.rfcommDisconnect(function(){
 				$scope.connect_button_show = true;
 				$scope.disconnect_button_show = false;
 			});
 		}
 		$scope.write = function(){
 			if($scope.writeValue){
-				device.classicalWrite("ascii",$scope.writeValue,function(){alert("classical write success!")});
+				device.rfcommWrite("ascii",$scope.writeValue,function(){alert("classical write success!")});
 			}
 		}
 		$scope.read = function(){
-			device.classicalRead(function(data){alert("classical read success! Data: " + data.value.getASCIIString());});
+			device.rfcommRead(function(data){alert("classical read success! Data: " + data.value.getASCIIString());});
 		}
 		$scope.subscribe = function(){
-	    	device.subscribe(function(data){alert(JSON.stringify(data.value.getASCIIString()));});
+	    	device.rfcommSubscribe(function(data){alert(JSON.stringify(data.value.getASCIIString()));});
 	    }
 	    
 	    $scope.rfcommListen = function(){

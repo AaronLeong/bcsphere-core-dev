@@ -135,24 +135,24 @@ var bluetooth = {
 		cordova.exec(successFunc,errorFunc,"BCBluetooth","stopClassicalScan",[]);
 	},
 	
-	classicalRead: function(successFunc,errorFunc,deviceAddress){
-		cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalRead", [{"deviceAddress":deviceAddress}]);
+	rfcommRead: function(successFunc,errorFunc,deviceAddress){
+		cordova.exec(successFunc,errorFunc, "BCBluetooth", "rfcommRead", [{"deviceAddress":deviceAddress}]);
     },
     
-    classicalWrite: function(successFunc,errorFunc,deviceAddress,writeValue){
-    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalWrite", [{"deviceAddress":deviceAddress,"writeValue":writeValue}]);
+    rfcommWrite: function(successFunc,errorFunc,deviceAddress,writeValue){
+    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "rfcommWrite", [{"deviceAddress":deviceAddress,"writeValue":writeValue}]);
     },
     
-    classicalSubscribe: function(successFunc,errorFunc,deviceAddress){
-    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalSubscribe", [{"deviceAddress":deviceAddress}]); 
+    rfcommSubscribe: function(successFunc,errorFunc,deviceAddress){
+    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "rfcommSubscribe", [{"deviceAddress":deviceAddress}]); 
     },
     
-    classicalConnect: function(successFunc,errorFunc,deviceAddress,APPURL,uuid,secure){
-    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalConnect", [{"deviceAddress":deviceAddress,"uuid":uuid,"secure":secure,"appurl":APPURL}]); 
+    rfcommConnect: function(successFunc,errorFunc,deviceAddress,APPURL,uuid,secure){
+    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "rfcommConnect", [{"deviceAddress":deviceAddress,"uuid":uuid,"secure":secure,"appurl":APPURL}]); 
     },
     
-    classicalDisconnect: function(successFunc,errorFunc,deviceAddress){
-    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "classicalDisconnect", [{"deviceAddress":deviceAddress}]); 
+    rfcommDisconnect: function(successFunc,errorFunc,deviceAddress){
+    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "rfcommDisconnect", [{"deviceAddress":deviceAddress}]); 
     },
     
     rfcommListen : function(successFunc,errorFunc,name,uuid,secure){
