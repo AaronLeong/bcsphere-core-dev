@@ -63,7 +63,10 @@ public class BluetoothSerialService {
     public static final String TOAST = "toast";
     
     public CallbackContext connectCallback;
+    public CallbackContext disconnectCallback;
     public CallbackContext dataAvailableCallback;
+    
+    private String deviceAddress;
     
     ByteBuffer buffer = ByteBuffer.allocate(2048);
     int bufferSize = 0;
@@ -174,6 +177,7 @@ public class BluetoothSerialService {
      */
     public synchronized void connect(BluetoothDevice device,String uuidstr, boolean secure) {
         if (D) Log.d(TAG, "connect to: " + device);
+        deviceAddress = device.getAddress();
         UUID uuid = UUID.fromString(uuidstr);
         // Cancel any thread attempting to make a connection
         if (mState == STATE_CONNECTING) {
@@ -347,7 +351,8 @@ public class BluetoothSerialService {
                         switch (mState) {
                             case STATE_LISTEN:
                             case STATE_CONNECTING:
-                            	bcbluetooth.classicalServices.put(socket.getRemoteDevice().getAddress(),service);
+                            	service.deviceAddress = socket.getRemoteDevice().getAddress();
+                            	bcbluetooth.classicalServices.put(service.deviceAddress,service);
                                 // Situation normal. Start the connected thread.
                                 connected(socket, socket.getRemoteDevice(),mSocketType);
                                 break;
@@ -567,9 +572,11 @@ public class BluetoothSerialService {
         }
     }
     private void notifyConnectionLost(String error) {
-        if (connectCallback != null) {
-            connectCallback.error(error);
-            connectCallback = null;
+        if (disconnectCallback != null) {
+        	JSONObject obj = new JSONObject();
+			Tools.addProperty(obj, Tools.DEVICE_ADDRESS, deviceAddress);
+			disconnectCallback.success(obj);
+        	disconnectCallback = null;
         }
     }
     private void sendDataToSubscriber(byte[] data) {

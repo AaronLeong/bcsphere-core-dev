@@ -1134,7 +1134,7 @@
 		 * @memberof Device
 		 * @example //Gets a the Device instance.
 		 * var device = window.device = BC.bluetooth.devices["78:C5:E5:99:26:37"];
-		 * device.rfcommConnect(function(){alert("device RFCOMM is connected!");});
+		 * device.rfcommConnect(function(){alert("device RFCOMM is connected!");},function(){alert("connect fail!");});
 		 * device.addEventListener("deviceconnected",function(s){alert("device:" + s.deviceAddress + "is connected successfully!")});
 		 * @param {string} UUID - the UUID to connect
 		 * @param {boolean} secure - secure connect or not

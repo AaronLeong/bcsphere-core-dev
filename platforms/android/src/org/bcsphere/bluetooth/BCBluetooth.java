@@ -45,6 +45,7 @@ public class BCBluetooth extends CordovaPlugin {
 	private IBluetooth bluetoothAPI = null;
 	private String versionOfAPI;
 	private CallbackContext newadvpacketContext;
+	private CallbackContext disconnectContext;
 	private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     
 	//classical interface relative data structure
@@ -93,6 +94,8 @@ public class BCBluetooth extends CordovaPlugin {
 			String eventName = Tools.getData(json, Tools.EVENT_NAME);
 			if (eventName.equals("newadvpacket") ) {
 				newadvpacketContext = callbackContext;
+			}else if(eventName.equals("disconnect")){
+				disconnectContext = callbackContext;
 			}
 			bluetoothAPI.addEventListener(json, callbackContext);
 			return true;
@@ -171,8 +174,11 @@ public class BCBluetooth extends CordovaPlugin {
 	        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceAddress);
 	        BluetoothSerialService classicalService = classicalServices.get(deviceAddress);
 	        
+	        
 	        if(classicalService == null){
-	        	classicalServices.put(deviceAddress, new BluetoothSerialService(deviceAddress));
+	        	BluetoothSerialService service = new BluetoothSerialService(deviceAddress);
+	        	service.disconnectCallback = disconnectContext;
+	        	classicalServices.put(deviceAddress, service);
 	        }
 	        
 	        if (device != null && classicalService != null) {

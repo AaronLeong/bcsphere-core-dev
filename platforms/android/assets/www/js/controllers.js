@@ -191,6 +191,11 @@ bccoredevControllers.controller('DescListCtrl',['$scope','$routeParams',
 bccoredevControllers.controller('ClassicalOperationCtrl',['$scope','$location','$routeParams',
 	function($scope,$location,$routeParams){
 		var device = BC.bluetooth.devices[$routeParams.deviceAddress];
+		device.addEventListener("devicedisconnected",function(){
+			alert("Peer device connection is lost.");
+			$scope.connect_button_show = true;
+			$scope.disconnect_button_show = false;
+		});
 		
 		if(device.isConnected == true){
 			$scope.disconnect_button_show = true;
