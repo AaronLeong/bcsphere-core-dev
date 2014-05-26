@@ -599,8 +599,9 @@ public class BluetoothSerialService {
         if (disconnectCallback != null) {
         	JSONObject obj = new JSONObject();
 			Tools.addProperty(obj, Tools.DEVICE_ADDRESS, deviceAddress);
-			disconnectCallback.success(obj);
-        	disconnectCallback = null;
+            PluginResult result = new PluginResult(PluginResult.Status.OK,obj);
+            result.setKeepCallback(true);
+            disconnectCallback.sendPluginResult(result);
         }
     }
     private void notifyConnectionFailed() {
