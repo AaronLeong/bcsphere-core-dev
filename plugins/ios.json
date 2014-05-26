@@ -32,6 +32,9 @@
         },
         "com.megster.cordova.bluetoothserial": {
             "PACKAGE_NAME": "com.jumacc.BCJS"
+        },
+        "org.bcsphere.bleprofiles": {
+            "PACKAGE_NAME": "com.jumacc.BCJS"
         }
     },
     "dependent_plugins": {

@@ -43,7 +43,7 @@ public class BluetoothSerialService {
     // Member fields
     private final BluetoothAdapter mAdapter;
     private final Handler mHandler;
-    private AcceptThread mSecureAcceptThread;
+    private AcceptThread mAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
@@ -58,7 +58,8 @@ public class BluetoothSerialService {
     public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
     public static final int MESSAGE_DEVICE_NAME = 4;
-    public static final int MESSAGE_TOAST = 5;
+    public static final int CONNECT_FAILED = 5;
+    public static final int CONNECT_LOST = 6;
     
     public static final String TOAST = "toast";
     
@@ -75,7 +76,7 @@ public class BluetoothSerialService {
      * Constructor. Prepares a new BluetoothSerial session.
      * @param handler  A Handler to send messages back to the UI Activity
      */
-    public BluetoothSerialService(String deviceAddress) {
+    public BluetoothSerialService() {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
         mHandler = new Handler() {
@@ -119,9 +120,11 @@ public class BluetoothSerialService {
                    case MESSAGE_DEVICE_NAME:
                        //Log.i(TAG, msg.getData().getString(DEVICE_NAME));
                        break;
-                   case MESSAGE_TOAST:
-                       String message = msg.getData().getString(TOAST);
-                       notifyConnectionLost(message);
+                   case CONNECT_FAILED:
+                       notifyConnectionFailed();
+                       break;
+                   case CONNECT_LOST:
+                       notifyConnectionLost();
                        break;
                 }
             }
@@ -164,9 +167,25 @@ public class BluetoothSerialService {
         setState(STATE_LISTEN);
         
         // Start the thread to listen on a BluetoothServerSocket
-        if (mSecureAcceptThread == null) {
-            mSecureAcceptThread = new AcceptThread(name,uuid,true,bcbluetooth,this);
-            mSecureAcceptThread.start();
+        if (mAcceptThread == null) {
+            mAcceptThread = new AcceptThread(name,uuid,secure,bcbluetooth,this);
+            mAcceptThread.start();
+        }
+    }
+    
+    public synchronized void unlisten() {
+        if (D) Log.d(TAG, "stopListen");
+        // Cancel any thread attempting to make a connection
+        if (mConnectThread != null) {mConnectThread.cancel(); mConnectThread = null;}
+
+        // Cancel any thread currently running a connection
+        if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
+
+        setState(STATE_NONE);
+        
+        // Start the thread to listen on a BluetoothServerSocket
+        if (mAcceptThread != null) {
+            mAcceptThread.cancel();
         }
     }
 
@@ -208,9 +227,9 @@ public class BluetoothSerialService {
         if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
 
         // Cancel the accept thread because we only want to connect to one device
-        if (mSecureAcceptThread != null) {
-            mSecureAcceptThread.cancel();
-            mSecureAcceptThread = null;
+        if (mAcceptThread != null) {
+            mAcceptThread.cancel();
+            mAcceptThread = null;
         }
 
         // Start the thread to manage the connection and perform transmissions
@@ -243,9 +262,9 @@ public class BluetoothSerialService {
             mConnectedThread = null;
         }
 
-        if (mSecureAcceptThread != null) {
-            mSecureAcceptThread.cancel();
-            mSecureAcceptThread = null;
+        if (mAcceptThread != null) {
+            mAcceptThread.cancel();
+            mAcceptThread = null;
         }
         setState(STATE_NONE);
     }
@@ -272,7 +291,7 @@ public class BluetoothSerialService {
      */
     private void connectionFailed() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(CONNECT_FAILED);
         Bundle bundle = new Bundle();
         bundle.putString(TOAST, "Unable to connect to device");
         msg.setData(bundle);
@@ -287,7 +306,7 @@ public class BluetoothSerialService {
      */
     private void connectionLost() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(CONNECT_LOST);
         Bundle bundle = new Bundle();
         bundle.putString(TOAST, "Device connection was lost");
         msg.setData(bundle);
@@ -308,12 +327,16 @@ public class BluetoothSerialService {
         private String mSocketType;
         private BCBluetooth bcbluetooth;
         private BluetoothSerialService service;
+        private String name;
+        private String uuidstr;
 
         public AcceptThread(String name,UUID uuid,boolean secure,BCBluetooth bluetooth,BluetoothSerialService serialService) {
             BluetoothServerSocket tmp = null;
             mSocketType = secure ? "Secure":"Insecure";
             bcbluetooth = bluetooth;
             service = serialService;
+            this.name = name;
+            this.uuidstr = uuid.toString();
 
             // Create a new listening server socket
             try {
@@ -353,6 +376,7 @@ public class BluetoothSerialService {
                             case STATE_CONNECTING:
                             	service.deviceAddress = socket.getRemoteDevice().getAddress();
                             	bcbluetooth.classicalServices.put(service.deviceAddress,service);
+                            	bcbluetooth.acceptServices.remove(name+uuidstr);
                                 // Situation normal. Start the connected thread.
                                 connected(socket, socket.getRemoteDevice(),mSocketType);
                                 break;
@@ -571,12 +595,20 @@ public class BluetoothSerialService {
             connectCallback.sendPluginResult(result);
         }
     }
-    private void notifyConnectionLost(String error) {
+    private void notifyConnectionLost() {
         if (disconnectCallback != null) {
         	JSONObject obj = new JSONObject();
 			Tools.addProperty(obj, Tools.DEVICE_ADDRESS, deviceAddress);
 			disconnectCallback.success(obj);
         	disconnectCallback = null;
+        }
+    }
+    private void notifyConnectionFailed() {
+        if (connectCallback != null) {
+        	JSONObject obj = new JSONObject();
+			Tools.addProperty(obj, Tools.DEVICE_ADDRESS, deviceAddress);
+			connectCallback.error(obj);
+        	connectCallback = null;
         }
     }
     private void sendDataToSubscriber(byte[] data) {

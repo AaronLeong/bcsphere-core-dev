@@ -126,15 +126,14 @@ var bluetooth = {
 	addEventListener : function(callback,errorFunc,arg){
 		cordova.exec(callback,errorFunc,"BCBluetooth","addEventListener",[{"eventName":arg.eventName,"arg":arg.arg}]);
 	},
-	
-	startClassicalScan : function(successFunc,errorFunc){
+		startClassicalScan : function(successFunc,errorFunc){
 		cordova.exec(successFunc,errorFunc,"BCBluetooth","startClassicalScan",[]);
 	},
-	
+
 	stopClassicalScan : function(successFunc,errorFunc){
 		cordova.exec(successFunc,errorFunc,"BCBluetooth","stopClassicalScan",[]);
 	},
-	
+
 	rfcommRead: function(successFunc,errorFunc,deviceAddress){
 		cordova.exec(successFunc,errorFunc, "BCBluetooth", "rfcommRead", [{"deviceAddress":deviceAddress}]);
     },
@@ -145,6 +144,10 @@ var bluetooth = {
     
     rfcommSubscribe: function(successFunc,errorFunc,deviceAddress){
     	cordova.exec(successFunc,errorFunc, "BCBluetooth", "rfcommSubscribe", [{"deviceAddress":deviceAddress}]); 
+    }, 
+       
+    rfcommUnsubscribe: function(successFunc,errorFunc,deviceAddress){
+    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "rfcommUnsubscribe", [{"deviceAddress":deviceAddress}]); 
     },
     
     rfcommConnect: function(successFunc,errorFunc,deviceAddress,APPURL,uuid,secure){
@@ -158,6 +161,11 @@ var bluetooth = {
     rfcommListen : function(successFunc,errorFunc,name,uuid,secure){
     	cordova.exec(successFunc,errorFunc,"BCBluetooth","rfcommListen",[{"name":name,"uuid":uuid,"secure":secure}]);
     },
+    
+    rfcommUnListen : function(successFunc,errorFunc,name,uuid){
+    	cordova.exec(successFunc,errorFunc,"BCBluetooth","rfcommUnListen",[{"name":name,"uuid":uuid}]);
+    },
+	
 };
 module.exports = bluetooth;
 

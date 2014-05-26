@@ -563,18 +563,24 @@
 				var subscribeCallback = device.subscribeCallback.bind(device,device.subscribeCallback);
 				navigator.bluetooth.rfcommSubscribe(subscribeCallback,testFunc,device.deviceAddress);
 			};
+			this.rfcommUnsubscribe = function(device){
+				navigator.bluetooth.rfcommUnsubscribe(testFunc,testFunc,device.deviceAddress);
+			};
 			this.rfcommConnect = function(uuid,secure,device){
-				var connectSuccess = device.rfcommConnectSuccess.bind(device,device.rfcommConnectSuccess);
-				var connectError = device.rfcommConnectError.bind(device,device.rfcommConnectError);
+				var connectSuccess = device.connectSuccess.bind(device,device.connectSuccess);
+				var connectError = device.connectError.bind(device,device.connectError);
 				navigator.bluetooth.rfcommConnect(connectSuccess,connectError,device.deviceAddress,APPURL,uuid,secure);
 			};
 			this.rfcommDisconnect = function(device){
-				var disconnectSuccess = device.rfcommDisconnectSuccess.bind(device,device.rfcommDisconnectSuccess);
-				var disconnectError = device.rfcommDisconnectSuccess.bind(device,device.rfcommDisconnectError);
+				var disconnectSuccess = device.disconnectSuccess.bind(device,device.disconnectSuccess);
+				var disconnectError = device.disconnectSuccess.bind(device,device.disconnectError);
 				navigator.bluetooth.rfcommDisconnect(disconnectSuccess,disconnectError,device.deviceAddress,APPURL);
 			};
 			this.rfcommListen = function(name,uuid,secure){
 				navigator.bluetooth.rfcommListen(testFunc,testFunc,name,uuid,secure);
+			};
+			this.rfcommUnListen = function(name,uuid){
+				navigator.bluetooth.rfcommUnListen(testFunc,testFunc,name,uuid);
 			};
 			
 		}else{
@@ -660,9 +666,11 @@
 			this.rfcommRead = this.bluetoothFuncs.rfcommRead;
 			this.rfcommWrite = this.bluetoothFuncs.rfcommWrite;
 			this.rfcommSubscribe = this.bluetoothFuncs.rfcommSubscribe;
+			this.rfcommUnsubscribe = this.bluetoothFuncs.rfcommUnsubscribe;
 			this.rfcommConnect = this.bluetoothFuncs.rfcommConnect;
 			this.rfcommDisconnect = this.bluetoothFuncs.rfcommDisconnect;
 			this.rfcommListen = this.bluetoothFuncs.rfcommListen;
+			this.rfcommUnListen = this.bluetoothFuncs.rfcommUnListen;
 			
 			this.bluetoothFuncs.initBluetooth();
 			
@@ -671,9 +679,10 @@
 			this.isopen = false;
 
 			this.UUIDMap = {};
-  			this.UUIDMap["00001802-0000-1000-8000-00805f9b34fb"] = BC.ImmediateAlert;
-  			this.UUIDMap["00001803-0000-1000-8000-00805f9b34fb"] = BC.LinkLoss;
-  			this.UUIDMap["00001804-0000-1000-8000-00805f9b34fb"] = BC.TxPower;
+  			this.UUIDMap["00001802-0000-1000-8000-00805f9b34fb"] = BC.ImmediateAlertService;
+  			this.UUIDMap["00001803-0000-1000-8000-00805f9b34fb"] = BC.LinkLossService;
+  			this.UUIDMap["00001804-0000-1000-8000-00805f9b34fb"] = BC.TxPowerService;
+  			this.UUIDMap["6E400001-B5A3-F393-E0A9-E50E24DCCA9E"] = BC.SerialPortService;
 		},
 	
 		addSystemListener : function(eventName,callback,arg){
@@ -823,6 +832,18 @@
 	 */
 	var RFCOMMListen = BC.Bluetooth.RFCOMMListen = function(name,uuid,secure){
 		BC.bluetooth.rfcommListen(name,uuid,secure);
+	};
+	
+	/** 
+	 * Stops a RFCOMM listen.
+	 * @memberof Bluetooth
+	 * @method 
+	 * @example BC.Bluetooth.RFCOMMUnListen("appname","your listen uuid");
+	 * @param {string} name - Name for the SDP record when creating server socket
+	 * @param {string} uuid - Unique UUID for your application
+	 */
+	var RFCOMMUnListen = BC.Bluetooth.RFCOMMUnListen = function(name,uuid){
+		BC.bluetooth.rfcommUnListen(name,uuid);
 	};
 	
 	function isNewDevice(deviceAddress){
@@ -1102,21 +1123,29 @@
 		},
 		
 		/**
-		 * Initiates a connection to the peripheral.
+		 * Initiates a connection to the peripheral(the connect can be BLE connect OR rfcomm connect(only in android platform) base on the device.type).
 		 * @memberof Device
 		 * @example //Gets a the Device instance.
 		 * var device = window.device = BC.bluetooth.devices["78:C5:E5:99:26:37"];
-		 * device.connect(function(){alert("device is already prepared well!");});
+		 * device.connect(function(){alert("device is already connected well!");});
+		 * //device.connect(function(){alert("device is already connected well!");},null,"7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",ture); //connect if the device is classical
 		 * device.addEventListener("deviceconnected",function(s){alert("device:" + s.deviceAddress + "is connected successfully!")});
+		 * device.addEventListener("devicedisconnected",function(s){alert("device:" + s.deviceAddress + "is connected successfully!")});
 		 * @param {function} successCallback - Success callback
 		 * @param {function} [errorCallback] - Error callback
+		 * @param {string} [uuid] - If connect with classical device,pass the uuid into this param(this param is required when you want to connect a classical device)
+		 * @param {boolean} [secure] - The classical connection is secure or not(this param is required when you want to connect a classical device)
 		 * @fires Device#deviceconnected
 		 * @instance
 		 */
-		connect : function(success,error){
+		connect : function(success,error,uuid,secure){
 			this.success = success;
 			this.error = error;
-			BC.bluetooth.connect(this);
+			if(this.type == "BLE"){
+				BC.bluetooth.connect(this);
+			}else{
+				BC.bluetooth.rfcommConnect(uuid,secure,this);
+			}
 		},
 		
 		connectSuccess : function(){
@@ -1126,36 +1155,6 @@
 		},
 		
 		connectError : function(){
-			this.error();
-		},
-		
-		/**
-		 * Initiates a classical RFCOMM connection to the peripheral.
-		 * @memberof Device
-		 * @example //Gets a the Device instance.
-		 * var device = window.device = BC.bluetooth.devices["78:C5:E5:99:26:37"];
-		 * device.rfcommConnect(function(){alert("device RFCOMM is connected!");},function(){alert("connect fail!");});
-		 * device.addEventListener("deviceconnected",function(s){alert("device:" + s.deviceAddress + "is connected successfully!")});
-		 * @param {string} UUID - the UUID to connect
-		 * @param {boolean} secure - secure connect or not
-		 * @param {function} successCallback - Success callback
-		 * @param {function} [errorCallback] - Error callback
-		 * @fires Device#deviceconnected
-		 * @instance
-		 */
-		rfcommConnect : function(uuid,secure,success,error){
-			this.success = success;
-			this.error = error;
-			BC.bluetooth.rfcommConnect(uuid,secure,this);
-		},
-		
-		rfcommConnectSuccess : function(){
-			this.isConnected = true;
-			this.dispatchEvent("deviceconnected");
-			this.success();
-		},
-		
-		rfcommConnectError : function(){
 			this.error();
 		},
 		
@@ -1254,7 +1253,11 @@
 		disconnect : function(success,error){
 			this.success = success;
 			this.error = error;
-			BC.bluetooth.disconnect(this);
+			if(this.type == "BLE"){
+				BC.bluetooth.disconnect(this);
+			}else if(this.type == "Classical"){
+				BC.bluetooth.rfcommDisconnect(this);
+			}
 		},
 		
 		disconnectSuccess : function(){
@@ -1263,29 +1266,6 @@
 		},
 		
 		disconnectError : function(){
-			this.error();
-		},
-		
-		/**
-		 * Disconnects a RFCOMM peripheral.
-		 * @memberof Device
-		 * @example device.rfcommDisconnect();
-		 * @param {function} [successCallback] - Success callback
-		 * @param {function} [errorCallback] - Error callback
-		 * @instance
-		 */		
-		rfcommDisconnect : function(success,error){
-			this.success = success;
-			this.error = error;
-			BC.bluetooth.rfcommDisconnect(this);
-		},
-		
-		rfcommDisconnectSuccess : function(){
-			this.isConnected = false;
-			this.success();
-		},
-		
-		rfcommDisconnectError : function(){
 			this.error();
 		},
 		
@@ -1514,7 +1494,7 @@
 		 * Subscribes the notification of this device RFCOMM.
 		 * @memberof Device
 		 * @example 
-		 * device.subscribe(onDataAvaliable);
+		 * device.rfcommSubscribe(onDataAvaliable);
 		 * function onDataAvaliable(data){
 		 *	$("#notifyValue_hex").html(data.value.getHexString());
 		 *	$("#notifyValue_unicode").html(data.value.getUnicodeString());
@@ -1535,6 +1515,17 @@
 			data.date = obj.date;
 			data.deviceAddress = obj.deviceAddress;
 			this.callback(data);
+		},
+		
+		/**
+		 * Unsubscribes the notification of this device RFCOMM.
+		 * @memberof Device
+		 * @example 
+		 * device.rfcommUnsubscribe();
+		 * @instance
+		 */
+		rfcommUnsubscribe : function(){
+			BC.bluetooth.rfcommUnsubscribe(this);
 		},
 		
 	});
@@ -1660,108 +1651,6 @@
 			return result;
 		},
   });
-  
-	var ImmediateAlert = BC.ImmediateAlert = BC.Service.extend({
-
-	   characteristicUUID:'2a06',
-
-	   no_alert : function(){
-	      this.alert('0');
-	   },
-	   
-	   mild_alert : function(){
-	      this.alert('1');
-	   },
-	   
-	   high_alert : function(){
-	      this.alert('2');
-	   },
-	   
-	   alert:function(writeValue,writeType,successFunc,errorFunc){
-	   	  successFunc = successFunc || this.writeSuccess;
-	   	  errorFunc = errorFunc || this.writeError;
-	   	  writeType = writeType ||　'hex';
-       	  this.discoverCharacteristics(function(){
-            	this.getCharacteristicByUUID(this.characteristicUUID)[0].write(writeType,writeValue,successFunc,errorFunc);
-          });
-	   },
-	      
-	   writeSuccess : function(){
-	      console.log('writeSuccess');
-	   },
-	   
-	   writeError : function(){
-	      console.log('writeFailed');
-	   },
-
-	});
-
-
-	var LinkLoss = BC.LinkLoss = BC.Service.extend({
-
-		characteristicUUID:'2a06',
-
-		no_alert : function(){
-		  this.alert('0');
-		},
-
-		mild_alert : function(){
-		  this.alert('1');
-		},
-
-		high_alert : function(){
-		  this.alert('2');
-		},
-
-		getValue : function(callback){
-		  	this.discoverCharacteristics(function(){
-			    this.getCharacteristicByUUID(this.characteristicUUID)[0].read(function(data){
-			 		callback(data.value);
-			    });
-			});
-		},
-	   
-	    alert:function(writeValue,writeType,successFunc,errorFunc){
-	    	successFunc = successFunc || this.writeSuccess;
-	   	    errorFunc = errorFunc || this.writeError;
-	   	    writeType= writeType ||　'hex';
-		    this.discoverCharacteristics(function(){
-		        this.getCharacteristicByUUID(this.characteristicUUID)[0].write(writeType,writeValue,successFunc,errorFunc);
-		    });
-	    },
-	      
-		writeSuccess : function(){
-		  console.log('writeSuccess');
-		},
-
-		writeError : function(){
-		  console.log('writeFailed');
-		},
-
-	});
-
-	var TxPower = BC.TxPower = BC.Service.extend({
-
-	   	characteristicUUID:'2a07',
-
-		getValue : function(callback){
-   	    	this.discoverCharacteristics(function(){
-				this.getCharacteristicByUUID(this.characteristicUUID)[0].read(function(data){
-	         	    callback(data.value);
-	            });
-	        });
-		},
-
-	    notify : function(callback){
-	   		this.discoverCharacteristics(function(){
-	   			this.getCharacteristicByUUID(this.characteristicUUID)[0].subscribe(function(data){
-	   				callback(data.value);
-	   			});
-	   		});
-	    },
-
-	});
-	
 
 
     /**

@@ -32,6 +32,10 @@ bccoredevApp.config(['$routeProvider',
 			templateUrl: 'classical_operation.html',
 			controller: 'ClassicalOperationCtrl'
 		}).
+		when('/serial_port_operation/:deviceAddress',{
+			templateUrl: 'serial_port_operation.html',
+			controller: 'SerialPortOperationCtrl'
+		}).
 		otherwise({
 			redirectTo: '/device_list'
 		});

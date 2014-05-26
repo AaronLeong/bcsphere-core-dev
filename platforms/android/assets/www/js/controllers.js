@@ -39,17 +39,17 @@ bccoredevControllers.controller('DeviceListCtrl',["$scope",'$location',function(
 	};
 
 	$scope.changePage = function(deviceAddress){
-		if(BC.bluetooth.devices[deviceAddress].type == "BLE"){
+		//for classical interface debug
+		/*if(BC.bluetooth.devices[deviceAddress].type == "BLE"){
 			return $location.path("\/service_list\/"+deviceAddress);
 		}else if(BC.bluetooth.devices[deviceAddress].type == "Classical"){
 			return $location.path("\/classical_operation\/"+deviceAddress);
-		}
+		}*/
+		
+		//for serial port debug
+		$location.path("\/serial_port_operation\/"+deviceAddress);
 	};
 	
-	$scope.rfcommListen = function(){
-		BC.Bluetooth.RFCOMMListen("listenName","7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true);
-		alert("rfcomm listen start successfully.");
-	};
 }]);
 
 bccoredevControllers.controller('ServiceListCtrl',['$scope','$location','$routeParams',
@@ -204,12 +204,12 @@ bccoredevControllers.controller('ClassicalOperationCtrl',['$scope','$location','
 		}
 		
 		$scope.rfcommConnect = function(){
-			device.rfcommConnect("7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true,function(){
+			device.connect(function(){
 				$scope.connect_button_show = false;
 				$scope.disconnect_button_show = true;
 			},function(){
 				alert("connect failed!");
-			});
+			},"7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true);
 		}
 		$scope.rfcommDisconnect = function(){
 			device.rfcommDisconnect(function(){
@@ -233,5 +233,71 @@ bccoredevControllers.controller('ClassicalOperationCtrl',['$scope','$location','
 			BC.Bluetooth.RFCOMMListen("listenName","7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true);
 			alert("rfcomm listen start successfully.");
 		};
+	}
+]);
+
+bccoredevControllers.controller('SerialPortOperationCtrl',['$scope','$location','$routeParams',
+	function($scope,$location,$routeParams){
+		var device = BC.bluetooth.devices[$routeParams.deviceAddress];
+		device.addEventListener("devicedisconnected",function(){
+			alert("Peer device connection is lost.");
+			$scope.connect_button_show = true;
+			$scope.disconnect_button_show = false;
+		});
+		
+		if(device.isConnected == true){
+			$scope.disconnect_button_show = true;
+		}else{
+			$scope.connect_button_show = true;
+		}
+		
+		$scope.subscribe_button_show = true;
+		$scope.listen_button_show = true;
+		
+		$scope.connect = function(){
+			device.connect(function(){
+				$scope.connect_button_show = false;
+				$scope.disconnect_button_show = true;
+			},function(){
+				alert("connect failed!");
+			},"7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true);
+		}
+		$scope.disconnect = function(){
+			device.disconnect(function(){
+				$scope.connect_button_show = true;
+				$scope.disconnect_button_show = false;
+			});
+		}
+		$scope.write = function(){
+			if($scope.writeValue){
+				BC.SerialPort.write(device,"ascii",$scope.writeValue,function(){alert("serial port write success!")});
+			}else{
+				alert("There is nothing to write.");
+			}
+		}
+		$scope.read = function(){
+			BC.SerialPort.read(device,function(data){alert("classical read success! Data: " + data.value.getASCIIString());});
+		}
+		$scope.subscribe = function(){
+			BC.SerialPort.subscribe(device,function(data){alert(JSON.stringify(data.value.getASCIIString()));});
+			$scope.subscribe_button_show = false;
+			$scope.unsubscribe_button_show = true;
+	    }
+	    $scope.unsubscribe = function(){
+			BC.SerialPort.unsubscribe(device);
+			$scope.unsubscribe_button_show = false;
+			$scope.subscribe_button_show = true;
+	    }
+	    $scope.listen = function(){
+			BC.SerialPort.listen("listenName","7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true);
+			$scope.listen_button_show = false;
+			$scope.unlisten_button_show = true;
+		}
+		$scope.unlisten = function(){
+			BC.SerialPort.unlisten("listenName","7A9C3B55-78D0-44A7-A94E-A93E3FE118CE");
+			$scope.listen_button_show = true;
+			$scope.unlisten_button_show = false;
+		}
+		
 	}
 ]);

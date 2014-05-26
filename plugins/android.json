@@ -34,6 +34,9 @@
         },
         "com.megster.cordova.bluetoothserial": {
             "PACKAGE_NAME": "org.bcsphere.bcsphere_core_dev"
+        },
+        "org.bcsphere.bleprofiles": {
+            "PACKAGE_NAME": "org.bcsphere.bcsphere_core_dev"
         }
     },
     "dependent_plugins": {

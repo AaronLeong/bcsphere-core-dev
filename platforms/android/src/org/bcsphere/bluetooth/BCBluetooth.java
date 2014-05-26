@@ -50,6 +50,8 @@ public class BCBluetooth extends CordovaPlugin {
     
 	//classical interface relative data structure
 	public HashMap<String, BluetoothSerialService> classicalServices = new HashMap<String, BluetoothSerialService>();
+	//when the accept services construct a connection , the service will remove from this map & append into classicalServices map for read/write interface call
+	public HashMap<String, BluetoothSerialService> acceptServices = new HashMap<String, BluetoothSerialService>();
 
 
 	public BCBluetooth() {
@@ -174,14 +176,13 @@ public class BCBluetooth extends CordovaPlugin {
 	        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceAddress);
 	        BluetoothSerialService classicalService = classicalServices.get(deviceAddress);
 	        
-	        
-	        if(classicalService == null){
-	        	BluetoothSerialService service = new BluetoothSerialService(deviceAddress);
-	        	service.disconnectCallback = disconnectContext;
-	        	classicalServices.put(deviceAddress, service);
+	        if(device != null && classicalService == null){
+	        	classicalService = new BluetoothSerialService();
+	        	classicalService.disconnectCallback = disconnectContext;
+	        	classicalServices.put(deviceAddress, classicalService);
 	        }
 	        
-	        if (device != null && classicalService != null) {
+	        if (device != null) {
 	        	classicalService.connectCallback = callbackContext;
 	        	classicalService.connect(device,uuidstr,secure);
 	        } else {
@@ -208,8 +209,17 @@ public class BCBluetooth extends CordovaPlugin {
 	    	if(securestr.equals("true")){
 	    		secure = true;
 	    	}
-	    	BluetoothSerialService service = new BluetoothSerialService("dummyAddress");
+	    	BluetoothSerialService service = new BluetoothSerialService();
 	    	service.listen(name, uuidstr, secure, this);
+	    	acceptServices.put(name+uuidstr, service);
+		}
+		if(action.equals("rfcommUnListen")){
+			String name = Tools.getData(json, Tools.NAME);
+			String uuidstr = Tools.getData(json, Tools.UUID);
+			BluetoothSerialService service = acceptServices.get(name+uuidstr);
+			if(service != null){
+				service.stop();
+			}
 		}
 		if(action.equals("rfcommWrite")){
 			String deviceAddress = Tools.getData(json, Tools.DEVICE_ADDRESS);
@@ -252,6 +262,15 @@ public class BCBluetooth extends CordovaPlugin {
 				callbackContext.error("there is no connection on device:" + deviceAddress);
 			}
 		}
+		if (action.equals("rfcommUnsubscribe")) {
+			String deviceAddress = Tools.getData(json, Tools.DEVICE_ADDRESS);
+			BluetoothSerialService service = classicalServices.get(deviceAddress);
+			if(service != null){
+				service.dataAvailableCallback = null;
+			}else{
+				callbackContext.error("there is no connection on device:" + deviceAddress);
+			}
+        }
 		if (!Tools.isOpenBluetooth()) {
 			Tools.sendErrorMsg(callbackContext);
 			return false;
