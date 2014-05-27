@@ -1,0 +1,24 @@
+<ons-page class="left">
+	<ons-scroller>
+	    <div class="topcoat-list">
+		    <ul class="topcoat-list__container">
+		      <li class="topcoat-list__item"  ng-repeat="characteristic in characteristics">
+		      <div ng-click="changePage(characteristic.device.deviceAddress,characteristic.upper.index,characteristic.index)">
+			        <span>
+						{{characteristic.name}}
+					</span>
+					<span>
+				    	{{characteristic.index}}
+				    </span>
+				    <span>
+				    	{{characteristic.property}}
+				    </span>
+				    <span>
+				    	{{characteristic.uuid}}
+				    </span>
+			    </div>
+		      </li>
+		    </ul>
+	    </div>
+	</ons-scroller>
+</ons-page>

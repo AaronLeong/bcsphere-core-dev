@@ -30,7 +30,7 @@ var serialport = {
 		}else if(device.type == "BLE"){
 			device.discoverServices(function(){
 				var service = device.getServiceByUUID(serialport.serviceUUID)[0];
-				service.read(successFunc,errorFunc);
+				service.read(serialport.role,successFunc,errorFunc);
 			});
 		}
 	},
@@ -41,7 +41,7 @@ var serialport = {
 		}else if(device.type == "BLE"){
 			device.discoverServices(function(){
 				var service = device.getServiceByUUID(serialport.serviceUUID)[0];
-				service.write(writeType,writeValue,successFunc,errorFunc);
+				service.write(serialport.role,writeType,writeValue,successFunc,errorFunc);
 			});
 		}
 	},
@@ -52,7 +52,7 @@ var serialport = {
 		}else if(device.type == "BLE"){
 			device.discoverServices(function(){
 				var service = device.getServiceByUUID(serialport.serviceUUID)[0];
-				service.subscribe(callback);
+				service.subscribe(serialport.role,callback);
 			});
 		}
 	},
@@ -63,7 +63,7 @@ var serialport = {
 		}else if(device.type == "BLE"){
 			device.discoverServices(function(){
 				var service = device.getServiceByUUID(serialport.serviceUUID)[0];
-				service.unsubscribe();
+				service.unsubscribe(serialport.role);
 			});
 		}
 	}, 

@@ -1,68 +1,50 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		
-		<title></title>
-		<link rel="stylesheet" href="css/jquery.mobile.min.css" />
-		<script type="text/javascript" charset="utf-8" src="js/jquery-1.7.1.min.js"></script>
-		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile.min.js"></script>
-		<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+<!doctype html>
+<html lang="en" ng-app="bccoredev">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <link rel="stylesheet" href="js/lib/css/onsenui.css">  
+        <link rel="stylesheet" href="js/lib/css/topcoat-mobile-onsen-ios7.css">  
+   
+    	<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
 		<script type="text/javascript" charset="utf-8" src="underscore.js"></script>
 		<script type="text/javascript" charset="utf-8" src="bc.js"></script>
-		<script type="text/javascript" charset="utf-8" src="bcibeacon.js"></script>
-		<script type="text/javascript" charset="utf-8" src="js/index.js"></script>
-		
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<script>
-			$(function(){
-				app.initialize();
-			});
-			
-		</script>
-		
-		<style>  
-    		div.ui-slider-switch { width: 9em }  
-		</style> 
-	</head>
-	<body>
-		<div data-role='page' id="content_page">
-			<div data-role='header' data-id="PersistentHeader" data-position="fixed">
-				<h1>BCSphereCoreDev</h1>
-				<div data-role="fieldcontain">  
-            		<select name="scan" id="scanOnOff" data-role="slider" >  
-                		<option value="0" selected="selected">Start Scan</option>  
-                		<option value="1">Scanning...</option>  
-            		</select>
-            		<select name="scaniBeacon" id="scanIBeaconOnOff" data-role="slider" >  
-                		<option value="0"  selected="selected">IBeacon Scan</option>  
-                		<option value="1">Scanning...</option>  
-            		</select>
-        		</div>      
-			</div>
-			<div data-role='content'>
-				<a id="createService" href="javascript:void(0)" onclick="app.createService()" data-role="button" style="clear:both; text-align:center;">Create Service!</a>
-				<a id="removeService" href="javascript:void(0)" onclick="app.removeService()" data-role="button" style="clear:both; text-align:center;">Remove Service!</a>
-				<a id="getPairedDevice" href="javascript:void(0)" onclick="app.getPairedDevice()" data-role="button" style="clear:both; text-align:center;">Get All Paired Device!</a>
-				<a id="getConnectedDevice" href="javascript:void(0)" onclick="app.getConnectedDevice()" data-role="button" style="clear:both; text-align:center;">Get All Connected Device!</a>
-				<a id="getConnectedWifiInfo" href="javascript:void(0)" onclick="app.getConnectedWifiInfo()" data-role="button" style="clear:both; text-align:center;">Get Connected Wifi Information!</a>
-				<a id="startIBeaconAdvertising" href="javascript:void(0)" onclick="app.startIBeaconAdvertising()" data-role="button" style="clear:both; text-align:center;">Start IBeacon Advertising(IOS >= 7.0)</a>
-				<div id="user_cont" style="clear:both; margin-top:20px;margin-bottom:10px;">
-					<ul data-role='listview' id="user_view">
+		<script type="text/javascript" charset="utf-8" src="bc-serial_port.js"></script>
+        <script src="js/lib/angular/angular.js"></script>
+        <script src="js/lib/angular/angular-route.js"></script>
+        <script src="js/lib/angular/angular-resource.js"></script>
+        <script src="js/lib/angular/angular-touch.js"></script>
+        <script src="js/lib/onsenui.js"></script> 
+        <script src="js/app.js"></script>
+        <script src="js/controllers.js"></script>
+        <title>bccoredev</title>
+        <style type="text/css">
+            *{
+                margin: 0;
+                padding: 0;
+            }
 
-					</ul>
-					<ul data-role='listview' id="list_model">
-						<li id="li_tpl" style="display:none">
-							<a href="javascript:void(0)" onclick="app.next_page('aaaa','bbbb','cccc')">
-								<p><h1 dbField='deviceName'>Mokai</h1></p>
-								<p>Is Connected: <span dbField='isConnected'>YES</span></p>
-								<p>Device ID: <span dbField='deviceAddress'>902897712-1292716-129128</span></p>
-							</a>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</div>
-	
-	</body>
+            span{
+                display: block;
+                height:25px;
+                line-height: 25px;
+            }
+
+            .scanSwitch{
+                height: 60px;
+                line-height: 50px;
+            }
+            .device_list{
+                display: block;
+                top:50px;
+            }
+        </style>
+    </head>
+    <body>
+        <ons-screen>
+            <ons-navigator title="BCCoredev">
+                <div ng-view></div>
+            </ons-navigator>
+        </ons-screen>
+    </body>
 </html>
