@@ -1,0 +1,24 @@
+<ons-page class="left">   
+	<div class="center">
+	<ons-button type="cta" ng-click="showAdvData()" style="display: block; width: 100%;">
+	            Show Advertisement Data
+	</ons-button>
+	</div>
+	<div class="topcoat-list">
+		    <ul class="topcoat-list__container">
+		      <li class="topcoat-list__item"  ng-repeat="service in services">
+			      <div  ng-click="changePage(service.device.deviceAddress,service.index)" >
+				        <span>
+							{{service.name}}
+						</span>
+						<span>
+					    	{{service.index}}
+					    </span>
+					    <span>
+					    	{{service.uuid}}
+					    </span>
+			      <div>
+		      </li>
+		    </ul>
+	    </div>
+</ons-page>

@@ -679,10 +679,11 @@
 			this.isopen = false;
 
 			this.UUIDMap = {};
+			//the uuid should be lower case.
   			this.UUIDMap["00001802-0000-1000-8000-00805f9b34fb"] = BC.ImmediateAlertService;
   			this.UUIDMap["00001803-0000-1000-8000-00805f9b34fb"] = BC.LinkLossService;
   			this.UUIDMap["00001804-0000-1000-8000-00805f9b34fb"] = BC.TxPowerService;
-  			this.UUIDMap["6E400001-B5A3-F393-E0A9-E50E24DCCA9E"] = BC.SerialPortService;
+  			this.UUIDMap["6e400001-b5a3-f393-e0a9-e50e24dcca9e"] = BC.SerialPortService;
 		},
 	
 		addSystemListener : function(eventName,callback,arg){
@@ -1411,6 +1412,7 @@
 				uuid_128 = uuid;
 			}
 			_.each(this.services, function(service){
+					service.uuid = service.uuid.toLowerCase();
 					if(service.uuid == uuid_128){
 						result.push(service);
 					}
@@ -1642,7 +1644,9 @@
 			var uuid = uuid.toLowerCase();
 			var result = [];
 			var uuid_128 = BC.Tools.ChangeTo128UUID(uuid);
+			
 			_.each(this.characteristics, function(characteristic){
+				characteristic.uuid = characteristic.uuid.toLowerCase();
 				if(characteristic.uuid == uuid_128){
 						result.push(characteristic);
 					}
