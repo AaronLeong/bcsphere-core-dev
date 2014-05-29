@@ -1,4 +1,4 @@
-cordova.define("org.bcsphere.bleprofiles.serialport", function(require, exports, module) { /*
+/*
     Copyright 2013-2014, JUMA Technology
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -167,5 +167,3 @@ var serialport = {
 	},
 };
 module.exports = serialport;
-
-});

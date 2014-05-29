@@ -3,7 +3,6 @@
 var bccoredevControllers = angular.module('bccoredevControllers',[]);
 
 bccoredevControllers.controller('DeviceListCtrl',["$scope",'$location',function($scope,$location){
-
 	$scope.switchScanItem = false;
 	if(BC.bluetooth){
 		$scope.devices = BC.bluetooth.devices;
@@ -255,7 +254,7 @@ bccoredevControllers.controller('SerialPortOperationCtrl',['$scope','$location',
 		$scope.listen_button_show = true;
 		
 		$scope.connect = function(){
-			device.connect(function(){
+			BC.SerialPort.connect(device,function(){
 				$scope.connect_button_show = false;
 				$scope.disconnect_button_show = true;
 			},function(){
@@ -276,10 +275,19 @@ bccoredevControllers.controller('SerialPortOperationCtrl',['$scope','$location',
 			}
 		}
 		$scope.read = function(){
-			BC.SerialPort.read(device,function(data){alert("classical read success! Data: " + data.value.getASCIIString());});
+			BC.SerialPort.read(device,function(data){
+                if(data){
+					alert("read success! Data: " + data.value.getASCIIString());
+                }else{
+                    alert("no data");
+                }
+			});
+			
 		}
 		$scope.subscribe = function(){
-			BC.SerialPort.subscribe(device,function(data){alert(JSON.stringify(data.value.getASCIIString()));});
+			BC.SerialPort.subscribe(device,function(data){
+                alert(data.value.getASCIIString());
+            });
 			$scope.subscribe_button_show = false;
 			$scope.unsubscribe_button_show = true;
 	    }

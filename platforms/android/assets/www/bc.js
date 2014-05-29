@@ -72,9 +72,10 @@
 	
 	//wait for plugin ready
 	var time = 0;
+	var bcreadyIsFired = false;
 	document.addEventListener("bccoreready",function(){
 		window.setTimeout(function(){
-			/*var interval = window.setInterval(function() {
+			var interval = window.setInterval(function() {
 				var isAllReady = true;
 				for(var plugin in BC.plugins){
 					if(time == 5){
@@ -88,10 +89,18 @@
 				}
 				time++;
 				if(isAllReady){
-					BC.Tools.FireDocumentEvent("bcready");
+					window.clearInterval(interval);
+					if(!bcreadyIsFired){
+						BC.Tools.FireDocumentEvent("bcready");
+						bcreadyIsFired = true;
+					}
 				}
-			}, 100);*/
-			BC.Tools.FireDocumentEvent("bcready");
+			}, 100);
+			
+			if(!bcreadyIsFired){
+				BC.Tools.FireDocumentEvent("bcready");
+				bcreadyIsFired = true;
+			}
 		},100);
 	});
 	
@@ -446,7 +455,8 @@
 			this.getDeviceAllData = function(device){
 				//bind "this" pointer in case of rewrite by js context.
 				var processDeviceAllData = device.processDeviceAllData.bind(device,device.processDeviceAllData);
-				navigator.bluetooth.getDeviceAllData(processDeviceAllData,testFunc,device.deviceAddress);
+				var getAllDataError = device.getAllDataError.bind(device,device.getAllDataError);
+				navigator.bluetooth.getDeviceAllData(processDeviceAllData,getAllDataError,device.deviceAddress);
 			};
 		
 			this.connect = function(device){
@@ -932,8 +942,8 @@
 	/**
 	 * DataValue provides some useful functions to convert raw byte data.
 	 * @class
-	 * @param {Uint8Array} value - The raw value
-	 * @property {Uint8Array} value - The raw value of DataValue object
+	 * @param {ArrayBuffer} value - The raw value
+	 * @property {ArrayBuffer} value - The raw value of DataValue object
 	 */
 	var DataValue = BC.DataValue = function(value){
 	    this.value = value;
@@ -1004,7 +1014,48 @@
 			}
 			return result;
 		},
-	   
+		
+	   	/**
+		 * Appends the dataValue object to the tail.
+		 * @memberof DataValue
+		 * @example //Gets a Device instance.
+		 * 	dataValue.append(otherDataValue);
+		 * @param {DataValue} dataValue - The dataValue to append
+		 * @instance
+		 * @returns {DataValue} return this pointer to support the chain operation
+		 */
+	   	append : function(dataValue){
+             if(!dataValue || !dataValue.value){
+                return this;
+             }
+             var dataView = new DataView(dataValue.value);
+             var totalLength = 0;
+             var thisLength = 0;
+             var thatLength = 0;
+             if(this.value && dataValue.value){
+                thisLength = this.value.byteLength;
+                thatLength = dataValue.value.byteLength;
+                length = thisLength + thatLength;
+             }else if(this.value){
+                thisLength = this.value.byteLength;
+                length = thisLength;
+             }else if(dataValue.value){
+                thatLength = dataValue.value.byteLength;
+                length = thatLength;
+             }
+             var ints = new Uint8Array(length);
+             if(thisLength != 0){
+                var thisDataView = new DataView(this.value);
+                for (var i = 0; i < thisLength; i++) {
+                    ints[i] = thisDataView.getUint8(i);
+                }
+             }
+             for (var j = thisLength,r = 0; j < length; j++,r++) {
+                ints[j] = dataView.getUint8(r);
+             }
+            this.value = ints.buffer;
+	   		return this;
+	   	}
 	});
 	
 	/**
@@ -1116,6 +1167,7 @@
 			this.softwareRevision = null;
 			this.manufacturerName = null;
 			this.RSSI = arg.RSSI;
+			this.isDiscovering = false;
 			this.advTimestamp = new Date().getTime();
 			this.type = arg.type;
 			if(!BC.Tools.IsEmpty(this.deviceInitialize)){
@@ -1179,7 +1231,10 @@
 				this.error("device is not connected!please call device.connect() first!");
 				return;
 			}
-			BC.bluetooth.getDeviceAllData(this);
+			if(!this.isDiscovering){
+			  this.isDiscovering = true;
+			  BC.bluetooth.getDeviceAllData(this);
+		    }
 		},
 		
 		/**
@@ -1194,7 +1249,10 @@
 			this.success = success;
 			this.error = error;
 			if(this.services == undefined || this.services == null || this.services.length==0){
-			    BC.bluetooth.discoverServices(this);
+			    if(!this.isDiscovering){
+			        this.isDiscovering = true;
+			        BC.bluetooth.discoverServices(this);
+			    }
 			}else{
 			    this.success();
 			}
@@ -1203,6 +1261,7 @@
 		discoverServicesSuccess : function(){
 			var rawObj = arguments[1];
             var device = this;
+            this.isDiscovering = false;
             this.services = [];
             _.each(rawObj.services, function(service){
                     var sindex = service.serviceIndex;
@@ -1222,12 +1281,14 @@
 		},
 		
 		discoverServicesError : function(){
+			this.isDiscovering = false;
 			this.error();
 		},
 		
 		processDeviceAllData : function(){
 			var rawObj = arguments[1];
 			var device = this;
+			this.isDiscovering = false;
 			this.services = [];
 			_.each(rawObj.services, function(service){
 					var sindex = service.serviceIndex;
@@ -1241,6 +1302,13 @@
 			if(this.success !== null){
 				this.success();
 			}
+		},
+
+		getAllDataError : function(){
+		  this.isDiscovering = false;
+		  if(this.error !== null){
+		      this.error();
+		  }
 		},
 		
 		/**

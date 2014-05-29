@@ -7,7 +7,7 @@
     <name>bleprofiles</name>
 	<description>Standard BLE profiles plugin based on BC.js</description>
 	<license>Apache 2.0</license>
-	<keywords>bcsphere,findme,proximity,serialport</keywords>
+	<keywords>bcsphere,findme,proximity</keywords>
 	<engines>
         <engine name="cordova" version=">=3.0.0" />
     </engines>
