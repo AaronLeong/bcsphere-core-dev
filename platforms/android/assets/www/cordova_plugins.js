@@ -1,13 +1,6 @@
 cordova.define('cordova/plugin_list', function(require, exports, module) {
 module.exports = [
     {
-        "file": "plugins/org.bcsphere.bluetooth/www/bluetooth.js",
-        "id": "org.bcsphere.bluetooth.bluetooth",
-        "merges": [
-            "navigator.bluetooth"
-        ]
-    },
-    {
         "file": "plugins/org.bcsphere.bleprofiles/www/findme.js",
         "id": "org.bcsphere.bleprofiles.findme",
         "merges": [
@@ -27,13 +20,20 @@ module.exports = [
         "merges": [
             "BC.SerialPort"
         ]
+    },
+    {
+        "file": "plugins/org.bcsphere.bluetooth/www/bluetooth.js",
+        "id": "org.bcsphere.bluetooth.bluetooth",
+        "merges": [
+            "navigator.bluetooth"
+        ]
     }
 ];
 module.exports.metadata = 
 // TOP OF METADATA
 {
-    "org.bcsphere.bluetooth": "0.3.0",
-    "org.bcsphere.bleprofiles": "0.1.0"
+    "org.bcsphere.bleprofiles": "0.1.0",
+    "org.bcsphere.bluetooth": "0.4.0"
 }
 // BOTTOM OF METADATA
 });
