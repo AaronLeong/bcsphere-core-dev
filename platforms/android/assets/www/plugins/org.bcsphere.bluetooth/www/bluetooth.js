@@ -126,7 +126,8 @@ var bluetooth = {
 	addEventListener : function(callback,errorFunc,arg){
 		cordova.exec(callback,errorFunc,"BCBluetooth","addEventListener",[{"eventName":arg.eventName,"arg":arg.arg}]);
 	},
-		startClassicalScan : function(successFunc,errorFunc){
+	
+	startClassicalScan : function(successFunc,errorFunc){
 		cordova.exec(successFunc,errorFunc,"BCBluetooth","startClassicalScan",[]);
 	},
 
