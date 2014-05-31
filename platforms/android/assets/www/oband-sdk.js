@@ -1,5 +1,5 @@
 (function(){
-	
+
 	function isOBand(device){
 		return device.advertisementData.localName == "OBand";
 	};

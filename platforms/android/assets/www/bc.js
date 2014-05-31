@@ -1771,9 +1771,9 @@
 		 */
 		subscribe : function(callback){
 			this.callback = callback;
-			//if(this.property.contains("notify")){
+			if(this.property.contains("notify") || this.property.contains("indicate")){
 				BC.bluetooth.subscribe(this);
-			//}
+			}
 		},
 		subscribeCallback : function(){
 			var obj = arguments[1];

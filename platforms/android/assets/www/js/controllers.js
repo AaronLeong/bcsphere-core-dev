@@ -4,7 +4,7 @@ var obandtestControllers = angular.module('obandtestControllers',[]);
 
 obandtestControllers.controller('DeviceListCtrl',["$scope",'$location',function($scope,$location){
 	$scope.switchOBandScanItem = false;
-	if(BC.oBandManager){
+	if(typeof(BC) != 'undefined' && BC.oBandManager){
 		$scope.obands = BC.oBandManager.obands;
 	}else{
 		document.addEventListener("bcready",function(){
