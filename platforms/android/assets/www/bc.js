@@ -693,6 +693,8 @@
 	function startDefaultScan(uuids){
 		if(API == "ios"){
 			BC.bluetooth.startScan(uuids);
+		}else if(API == "classical"){
+			BC.bluetooth.startClassicalScan();
 		}else{
 			startDefaultScanImpl(uuids);
 			BC.bluetooth.scanIntervalIndex = setInterval(function(){
