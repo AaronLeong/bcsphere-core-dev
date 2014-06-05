@@ -191,7 +191,6 @@ bccoredevControllers.controller('ClassicalOperationCtrl',['$scope','$location','
 	function($scope,$location,$routeParams){
 		var device = BC.bluetooth.devices[$routeParams.deviceAddress];
 		device.addEventListener("devicedisconnected",function(){
-			alert("Peer device connection is lost.");
 			$scope.connect_button_show = true;
 			$scope.disconnect_button_show = false;
 		});
@@ -239,6 +238,7 @@ bccoredevControllers.controller('SerialPortOperationCtrl',['$scope','$location',
 	function($scope,$location,$routeParams){
 		var device = BC.bluetooth.devices[$routeParams.deviceAddress];
 		device.addEventListener("devicedisconnected",function(){
+			navigator.notification.beep();
 			alert("Peer device connection is lost.");
 			$scope.connect_button_show = true;
 			$scope.disconnect_button_show = false;
@@ -257,8 +257,10 @@ bccoredevControllers.controller('SerialPortOperationCtrl',['$scope','$location',
 			BC.SerialPort.connect(device,function(){
 				$scope.connect_button_show = false;
 				$scope.disconnect_button_show = true;
+				navigator.notification.stopBeep();
 			},function(){
 				alert("connect failed!");
+				navigator.notification.stopBeep();
 			},"7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true);
 		}
 		$scope.disconnect = function(){

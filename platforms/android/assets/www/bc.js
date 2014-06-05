@@ -13,7 +13,9 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-(function(){
+
+cordova.define("org.bcsphere.bcjs", function(require, exports, module) {
+
 	var root = this;
 	/**
 	 * BC namespace includes all kinds of magic things, all the classes is registered on it, enjoy it :).
@@ -570,10 +572,6 @@
 
 			this.UUIDMap = {};
 			//the uuid should be lower case.
-  			this.UUIDMap["00001802-0000-1000-8000-00805f9b34fb"] = BC.ImmediateAlertService;
-  			this.UUIDMap["00001803-0000-1000-8000-00805f9b34fb"] = BC.LinkLossService;
-  			this.UUIDMap["00001804-0000-1000-8000-00805f9b34fb"] = BC.TxPowerService;
-  			this.UUIDMap["6e400001-b5a3-f393-e0a9-e50e24dcca9e"] = BC.SerialPortService;
 		},
 	
 		addSystemListener : function(eventName,callback,arg){
@@ -975,6 +973,10 @@
 		},
 	});
 	
+	var Profile = BC.Profile = BC.EventDispatcher.extend({
+	
+	});
+	
 	/**
 	 * Triggered when the device has been disconnected.
 	 * @example var device = BC.bluetooth.devices["34:23:41:66:37:65"];
@@ -1053,6 +1055,10 @@
 			this.isDiscovering = false;
 			this.advTimestamp = new Date().getTime();
 			this.type = arg.type;
+			if(arg.deviceAddress){
+				BC.bluetooth.devices[arg.deviceAddress] = this;
+			}
+			
 			if(!BC.Tools.IsEmpty(this.deviceInitialize)){
 				this.deviceInitialize.apply(this, arguments);
 			}
@@ -1077,10 +1083,14 @@
 		connect : function(success,error,uuid,secure){
 			this.success = success;
 			this.error = error;
-			if(this.type == "BLE"){
-				BC.bluetooth.connect(this);
+			if(!this.isConnected){
+				if(this.type == "BLE"){
+					BC.bluetooth.connect(this);
+				}else{
+					BC.bluetooth.rfcommConnect(uuid,secure,this);
+				}
 			}else{
-				BC.bluetooth.rfcommConnect(uuid,secure,this);
+				success();
 			}
 		},
 		
@@ -1205,10 +1215,14 @@
 		disconnect : function(success,error){
 			this.success = success;
 			this.error = error;
-			if(this.type == "BLE"){
-				BC.bluetooth.disconnect(this);
-			}else if(this.type == "Classical"){
-				BC.bluetooth.rfcommDisconnect(this);
+			if(this.isConnected){
+				if(this.type == "BLE"){
+					BC.bluetooth.disconnect(this);
+				}else if(this.type == "Classical"){
+					BC.bluetooth.rfcommDisconnect(this);
+				}
+			}else{
+				success();
 			}
 		},
 		
@@ -2054,7 +2068,6 @@
 			}
 			if(isNewDevice(deviceAddress)){
 				var newdevice = new BC.Device({deviceAddress:deviceAddress,deviceName:deviceName,advertisementData:advertisementData,isConnected:isConnected,RSSI:RSSI,type:type});
-				BC.bluetooth.devices[deviceAddress] = newdevice;
 				BC.bluetooth.dispatchEvent("newdevice",newdevice);
 			}else{
 				var thedevice = BC.bluetooth.devices[deviceAddress];
@@ -2098,5 +2111,10 @@
 			},testFunc);
 		},function(mes){alert(JSON.stringify(mes));});
 	}
-  
-})();
+	
+	module.exports = BC;
+	
+});
+
+
+
