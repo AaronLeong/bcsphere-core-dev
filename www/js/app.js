@@ -1,40 +1,20 @@
-var bccoredevApp = angular.module('bccoredev',[
+var obandtestApp = angular.module('obandtest',[
 	'ngTouch',
 	'ngRoute',
-	'bccoredevControllers',
+	'obandtestControllers',
 	'onsen.directives'
 ]);
 
-bccoredevApp.config(['$routeProvider',
+obandtestApp.config(['$routeProvider',
 	function($routeProvider){
 	  $routeProvider.
 		when('/device_list',{
 			templateUrl: 'device_list.html',
 			controller: 'DeviceListCtrl'
-		}).
-		when('/service_list/:deviceAddress',{
-			templateUrl: 'service_list.html',
-			controller: 'ServiceListCtrl'
-		}).
-		when('/char_list/:deviceAddress/:serviceIndex',{
-			templateUrl: 'char_list.html',
-			controller: 'CharListCtrl'
-		}).
-		when('/operate_char/:deviceAddress/:serviceIndex/:characteristicIndex',{
-			templateUrl: 'operate_char.html',
-			controller: 'OperateCharCtrl'
-		}).
-		when('/desc_list/:deviceAddress/:serviceIndex/:characteristicIndex',{
-			templateUrl: 'desc_list.html',
-			controller: 'DescListCtrl'
-		}).
-		when('/classical_operation/:deviceAddress',{
-			templateUrl: 'classical_operation.html',
-			controller: 'ClassicalOperationCtrl'
-		}).
-		when('/serial_port_operation/:deviceAddress',{
-			templateUrl: 'serial_port_operation.html',
-			controller: 'SerialPortOperationCtrl'
+		}).		
+		when('/oband_operation/:deviceAddress',{
+			templateUrl: 'oband_operation.html',
+			controller: 'OBandOperationCtrl'
 		}).
 		otherwise({
 			redirectTo: '/device_list'
