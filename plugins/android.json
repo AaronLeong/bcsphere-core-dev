@@ -20,13 +20,9 @@
         }
     },
     "installed_plugins": {
-        "org.bcsphere.bleprofiles": {
+        "org": {
             "PACKAGE_NAME": "org.bcsphere.bcsphere_core_dev"
         }
     },
-    "dependent_plugins": {
-        "org.bcsphere.bluetooth": {
-            "PACKAGE_NAME": "org.bcsphere.bcsphere_core_dev"
-        }
-    }
+    "dependent_plugins": {}
 }

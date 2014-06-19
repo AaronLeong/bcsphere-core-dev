@@ -1,39 +1,102 @@
 cordova.define('cordova/plugin_list', function(require, exports, module) {
 module.exports = [
     {
-        "file": "plugins/org.bcsphere.bleprofiles/www/findme.js",
-        "id": "org.bcsphere.bleprofiles.findme",
-        "merges": [
-            "BC.Findme"
-        ]
+        "file": "plugins/org/www/org.underscorejs.underscore/underscore.js",
+        "id": "org.underscorejs.underscore"
     },
     {
-        "file": "plugins/org.bcsphere.bleprofiles/www/proximity.js",
-        "id": "org.bcsphere.bleprofiles.proximity",
-        "merges": [
-            "BC.Proximity"
-        ]
+        "file": "plugins/org/www/org.bcsphere/bc.js",
+        "id": "org.bcsphere.bcjs"
     },
     {
-        "file": "plugins/org.bcsphere.bleprofiles/www/serialport.js",
-        "id": "org.bcsphere.bleprofiles.serialport",
-        "merges": [
-            "BC.SerialPort"
-        ]
-    },
-    {
-        "file": "plugins/org.bcsphere.bluetooth/www/bluetooth.js",
-        "id": "org.bcsphere.bluetooth.bluetooth",
+        "file": "plugins/org/www/org.bcsphere.bluetooth/bluetoothapi.js",
+        "id": "org.bcsphere.bluetooth.bluetoothapi",
         "merges": [
             "navigator.bluetooth"
+        ]
+    },
+    {
+        "file": "plugins/org/www/org.bluetooth.profile/proximity.js",
+        "id": "org.bluetooth.profile.proximity",
+        "merges": [
+            "BC"
+        ]
+    },
+    {
+        "file": "plugins/org/www/org.bluetooth.profile/find_me.js",
+        "id": "org.bluetooth.profile.find_me",
+        "merges": [
+            "BC"
+        ]
+    },
+    {
+        "file": "plugins/org/www/org.bluetooth.profile/serial_port.js",
+        "id": "org.bluetooth.profile.serial_port",
+        "merges": [
+            "BC"
+        ]
+    },
+    {
+        "file": "plugins/org/www/org.bluetooth.service/battery_service.js",
+        "id": "org.bluetooth.service.battery_service",
+        "merges": [
+            "BC"
+        ]
+    },
+    {
+        "file": "plugins/org/www/org.bluetooth.service/blood_pressure.js",
+        "id": "org.bluetooth.service.blood_pressure",
+        "merges": [
+            "BC"
+        ]
+    },
+    {
+        "file": "plugins/org/www/org.bluetooth.service/device_information.js",
+        "id": "org.bluetooth.service.device_information",
+        "merges": [
+            "BC"
+        ]
+    },
+    {
+        "file": "plugins/org/www/org.bluetooth.service/health_thermometer.js",
+        "id": "org.bluetooth.service.health_thermometer",
+        "merges": [
+            "BC"
+        ]
+    },
+    {
+        "file": "plugins/org/www/org.bluetooth.service/immediate_alert.js",
+        "id": "org.bluetooth.service.immediate_alert",
+        "merges": [
+            "BC"
+        ]
+    },
+    {
+        "file": "plugins/org/www/org.bluetooth.service/link_loss.js",
+        "id": "org.bluetooth.service.link_loss",
+        "merges": [
+            "BC"
+        ]
+    },
+    {
+        "file": "plugins/org/www/org.bluetooth.service/serial_port.js",
+        "id": "org.bluetooth.service.serial_port",
+        "merges": [
+            "BC"
+        ]
+    },
+    {
+        "file": "plugins/org/www/org.bluetooth.service/tx_power.js",
+        "id": "org.bluetooth.service.tx_power",
+        "merges": [
+            "BC"
         ]
     }
 ];
 module.exports.metadata = 
 // TOP OF METADATA
 {
-    "org.bcsphere.bleprofiles": "0.1.0",
-    "org.bcsphere.bluetooth": "0.4.0"
+    "org": "0.4.0"
 }
 // BOTTOM OF METADATA
 });
