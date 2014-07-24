@@ -28,7 +28,7 @@
 			BC = root.BC = {};
 		}
 		
-		BC.VERSION = "0.4.0";
+		BC.VERSION = "0.5.0";
 		/** 
 		 * Opens all useful alert.
 		 * @global 
@@ -988,6 +988,37 @@
 			},
 		});
 		
+		/**
+		 * Profile is a bundle of functions to operate the devices, our implements are based on bluetooth specification(www.bluetooth.org).
+		 * @example //define a custom profile
+		 * var FindMeProfile = BC.FindMeProfile = BC.Profile.extend({
+		 *	
+		 *	no_alert : function(device){
+		 *	  this.alert(device,'0');
+		 *	},
+		 *  
+		 *	mild_alert : function(device){
+		 *	  this.alert(device,'1');
+		 *	},
+		 *   
+		 *	high_alert : function(device){
+		 *	  this.alert(device,'2');
+		 *	},
+		 *
+		 *	alert : function(device,level){
+		 *		device.discoverServices(function(){
+		 *			var service = device.getServiceByUUID(serviceUUID)[0];
+		 *			service.alert(level);
+		 *		});
+		 *	},
+		 *	
+		 *});
+		 *
+		 * //use profile
+		 * var findmeProfile = new BC.FindMeProfile();
+		 * findmeProfile.high_alert(device);
+		 * @class
+		 */
 		var Profile = BC.Profile = BC.EventDispatcher.extend({
 		
 		});
@@ -1203,7 +1234,11 @@
 						var sname = service.serviceName;
 						var suuid = service.serviceUUID;
 						var chars = service.characteristics;
-						device.services.push(new BC.Service({index:sindex,uuid:suuid,name:sname,device:device,chars:chars}));
+						if(BC.bluetooth.UUIDMap[suuid]){
+							device.services.push(new BC.bluetooth.UUIDMap[suuid]({index:sindex,uuid:suuid,name:sname,device:device,chars:chars}));
+						}else{
+							device.services.push(new BC.Service({index:sindex,uuid:suuid,name:sname,device:device,chars:chars}));
+						}
 					}
 				);
 				this.isPrepared = true;
@@ -1385,12 +1420,7 @@
 			getServiceByUUID : function(uuid){
 				var uuid = uuid.toLowerCase();
 				var result = [];
-				var uuid_128 = "";
-				if(uuid.length == 4){
-					uuid_128 = "0000"+ uuid +"-0000-1000-8000-00805f9b34fb";
-				}else if(uuid.length == 36){
-					uuid_128 = uuid;
-				}
+				var uuid_128 = BC.Tools.ChangeTo128UUID(uuid);
 				_.each(this.services, function(service){
 						service.uuid = service.uuid.toLowerCase();
 						if(service.uuid == uuid_128){
@@ -1735,6 +1765,7 @@
 				data.characteristicIndex = this.index;
 				data.date = arguments[1].date;
 				data.value = new BC.DataValue(BC.Tools.Base64ToBuffer(arguments[1].value));
+				//data.value = new BC.DataValue(arguments[1].value);
 				this.success(data);
 			},
 			readError : function(){
@@ -1752,7 +1783,7 @@
 			 * function writeSuccess(data){
 			 *	alert("write success!");
 			 * }
-			 * @param {string} type - The type of the value to write ('hex'/'ascii'/'unicode'/'raw')
+			 * @param {string} type - The type of the value to write ('hex'/'ascii'/'unicode'/'raw'/'base64')
 			 * @param {string/Uint8Array} value - The value write to this characteristic, if the 'type' is 'raw', the value type should be Uint8Array
 			 * @param {function} successCallback - Success callback
 			 * @param {function} [errorCallback] - Error callback
@@ -1769,8 +1800,10 @@
 					value = BC.Tools.UnicodeToBase64(value);
 				}else if(type.toLowerCase() == "raw"){
 					value = BC.Tools.ConvertToBase64(value);
+				}else if(type.toLowerCase() == "base64"){
+					value = value;
 				}else{
-					error("Please input 'hex'/'ascii'/'unicode' type.");
+					error("Please input 'hex'/'ascii'/'unicode'/'raw'/'base64' type.");
 					return;
 				}
 				if(this.property.contains("write") || this.property.contains("writeWithoutResponse")){
@@ -1810,6 +1843,7 @@
 				var obj = arguments[1];
 				var data = {};
 				data.value = new BC.DataValue(BC.Tools.Base64ToBuffer(obj.value));
+				//data.value = new BC.DataValue(obj.value);
 				data.serviceIndex = obj.serviceIndex;
 				data.characteristicIndex = obj.characteristicIndex;
 				data.date = obj.date;
@@ -1919,12 +1953,7 @@
 			getDescriptorByUUID : function(uuid){
 				var uuid = uuid.toLowerCase();
 				var result = [];
-				var uuid_128 = "";
-				if(uuid.length == 4){
-					uuid_128 = "0000"+ uuid +"-0000-1000-8000-00805f9b34fb";
-				}else if(uuid.length == 36){
-					uuid_128 = uuid;
-				}
+				var uuid_128 = BC.Tools.ChangeTo128UUID(uuid);
 				_.each(this.descriptors, function(descriptor){
 						if(descriptor.uuid == uuid_128){
 							result.push(descriptor);
@@ -2094,7 +2123,7 @@
 					}
 					thedevice.advTimestamp = new Date().getTime();
 				}
-				
+				BC.bluetooth.dispatchEvent("newadvpacket",scanData);
 			});
 
 			document.addEventListener("bluetoothclose",function(){
@@ -2128,7 +2157,5 @@
 		}
 		
 		module.exports = BC;
-		
-	
 
 

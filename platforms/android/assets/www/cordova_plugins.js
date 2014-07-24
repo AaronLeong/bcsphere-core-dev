@@ -51,13 +51,6 @@ module.exports = [
         ]
     },
     {
-        "file": "plugins/org/www/org.bluetooth.service/device_information.js",
-        "id": "org.bluetooth.service.device_information",
-        "merges": [
-            "BC"
-        ]
-    },
-    {
         "file": "plugins/org/www/org.bluetooth.service/health_thermometer.js",
         "id": "org.bluetooth.service.health_thermometer",
         "merges": [
@@ -91,12 +84,26 @@ module.exports = [
         "merges": [
             "BC"
         ]
+    },
+    {
+        "file": "plugins/org/www/org.bcsphere.ibeacon/ibeaconapi.js",
+        "id": "org.bcsphere.ibeacon.ibeaconapi",
+        "merges": [
+            "navigator.ibeacon"
+        ]
+    },
+    {
+        "file": "plugins/org/www/org.bcsphere/ibeacon.js",
+        "id": "org.bcsphere.ibeacon",
+        "merges": [
+            "BC"
+        ]
     }
 ];
 module.exports.metadata = 
 // TOP OF METADATA
 {
-    "org": "0.4.0"
+    "org": "0.5.0"
 }
 // BOTTOM OF METADATA
 });

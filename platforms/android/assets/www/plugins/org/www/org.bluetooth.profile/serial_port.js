@@ -25,6 +25,15 @@ cordova.define("org.bluetooth.profile.serial_port", function(require, exports, m
 		var role = "Master";
 		var service = {};
 		
+		/**
+		 * BC.SerialPortProfile is an implementation of serial port.(best effort for IOS/Android implementation)
+		 * <b>Please Note:</b> JSDoc can't generate part of the javascript file, please check the detail interface usage in the source file code comments.
+		 * @memberof BC
+		 * @class
+		 * @property {string} readcharUUID - The read characteristic uuid
+		 * @property {string} writecharUUID - The write characteristic uuid
+		 * @property {string} serviceUUID - The serial port service uuid for BLE
+		 */
 		var SerialPortProfile = BC.SerialPortProfile = BC.Profile.extend({
 
 			processRcvDataCallback : function(data){
@@ -38,6 +47,23 @@ cordova.define("org.bluetooth.profile.serial_port", function(require, exports, m
 				}
 			},
 			
+			/**
+			 * Connect to device (choose the connection by device.type)
+			 * @memberof SerialPortProfile
+			 * @example 
+			 * 	function connect(device){
+			 *		BC.SerialPortProfile.connect(device,function(){
+			 *			alert("device is connected!");
+			 *		},function(){
+			 *			alert("connect failed!");
+			 *		},"7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true);
+			 *  }
+			 * @param {Device} device - the device object to connect
+			 * @param {function} successCallback - Success callback
+			 * @param {function} [errorCallback] - Error callback
+			 * @param {string} [uuid] - the RFCOMM uuid for classical bluetooth interface to connect
+			 * @param {boolean} [secure] - establish security connection or not
+			 */				
 			connect : function(device,successFunc,errorFunc,uuid,secure){
 				device.connect(function(){
 					device.discoverServices(function(){
@@ -48,6 +74,21 @@ cordova.define("org.bluetooth.profile.serial_port", function(require, exports, m
 				},errorFunc,uuid,secure);
 			},
 			
+			/**
+			 * Reads data from the connection.
+			 * @memberof SerialPortProfile
+			 * @example 
+			 *	BC.SerialPortProfile.read(device,function(data){
+			 *		if(data){
+			 *			alert("read success! Data: " + data.value.getASCIIString());
+			 *		}else{
+			 *			alert("no data");
+			 *		}
+			 *	});
+			 * @param {Device} device - the device object to connect
+			 * @param {function} successCallback - Success callback
+			 * @param {function} [errorCallback] - Error callback
+			 */				
 			read : function(device,successFunc,errorFunc){
 				if(API == "ios" && role == this.SLAVE){
 					if(!this.buffer){
@@ -74,6 +115,16 @@ cordova.define("org.bluetooth.profile.serial_port", function(require, exports, m
 				}
 			},
 			
+			/**
+			 * Writes data to the connection.
+			 * @memberof SerialPortProfile
+			 * @example 
+			 * BC.SerialPortProfile.write(device,"ascii","hello world!",function(){alert("serial port write success!")});
+			 * @param {string} type - The type of the value to write ('hex'/'ascii'/'unicode'/'raw'/'base64')
+			 * @param {string/Uint8Array} value - The value write to this characteristic, if the 'type' is 'raw', the value type should be Uint8Array
+			 * @param {function} successCallback - Success callback
+			 * @param {function} [errorCallback] - Error callback
+			 */
 			write : function(device,writeType,writeValue,successFunc,errorFunc){
 				if(API == "ios" && role == this.SLAVE){
 					service.getCharacteristicByUUID(readcharUUID)[0].notify(writeType,writeValue,successFunc,errorFunc);
@@ -89,6 +140,14 @@ cordova.define("org.bluetooth.profile.serial_port", function(require, exports, m
 				}
 			},
 			
+			/**
+			 * Subscribe data on the connection.
+			 * @memberof SerialPortProfile
+			 * @example 
+			 * BC.SerialPortProfile.write(device,"ascii","hello world!",function(){alert("serial port write success!")});
+			 * @param {Device} device - the device object to connect
+			 * @param {function} callback - this callback will be called when the data coming
+			 */			
 			subscribe : function(device,callback){
 				if(API == "ios" && role == this.SLAVE){
 					this.subscribeCallback = callback;
@@ -103,6 +162,13 @@ cordova.define("org.bluetooth.profile.serial_port", function(require, exports, m
 				}
 			},
 			
+			/**
+			 * Unsubscribe data on the connection.
+			 * @memberof SerialPortProfile
+			 * @example 
+			 * BC.SerialPortProfile.unsubscribe(device);
+			 * @param {Device} device - the device object to connect
+			 */				
 			unsubscribe : function(device){
 				if(API == "ios" && role == this.SLAVE){
 					this.subscribeCallback = null;
@@ -117,6 +183,15 @@ cordova.define("org.bluetooth.profile.serial_port", function(require, exports, m
 				}
 			}, 
 			
+			/**
+			 * Listen data on the connection.
+			 * @memberof SerialPortProfile
+			 * @example 
+			 * BC.SerialPortProfile.listen("listenName","7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",true);
+			 * @param {string} [name] - the name of this connection, for the RFCOMM connection only
+			 * @param {string} [uuid] - the uuid of this connection, for the RFCOMM connection only
+			 * @param {boolean} [secure] - the RFCOMM connection is security or not
+			 */	
 			listen : function(name,uuid,secure){
 				if(API !== "ios" && name && uuid && secure){
 					BC.Bluetooth.RFCOMMListen(name,uuid,secure);
@@ -152,7 +227,15 @@ cordova.define("org.bluetooth.profile.serial_port", function(require, exports, m
 					});
 				}
 			},
-			
+
+			/**
+			 * Unlisten data on the connection.
+			 * @memberof SerialPortProfile
+			 * @example 
+			 * BC.SerialPortProfile.unlisten("listenName","7A9C3B55-78D0-44A7-A94E-A93E3FE118CE");
+			 * @param {string} [name] - the name of this connection, for the RFCOMM connection only
+			 * @param {string} [uuid] - the uuid of this connection, for the RFCOMM connection only
+			 */			
 			unlisten : function(name,uuid){
 				if(API !== "ios" && name && uuid){
 					BC.Bluetooth.RFCOMMUnListen(name,uuid);
@@ -167,6 +250,19 @@ cordova.define("org.bluetooth.profile.serial_port", function(require, exports, m
 						});
 					}
 				}
+			},
+			
+			/**
+			 * Unlisten data on the connection.
+			 * @memberof SerialPortProfile
+			 * @example 
+			 * BC.SerialPortProfile.disconnect(device);
+			 * @param {Device} device - the device object to connect
+			 * @param {function} successCallback - Success callback
+			 * @param {function} [errorCallback] - Error callback
+			 */
+			disconnect : function(device,success,error){
+				device.disconnect(success,error);
 			},
 		});
 		

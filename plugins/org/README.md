@@ -1,10 +1,10 @@
-BC.js (v0.4.0)
+BC.js (v0.5.0)
 ===================================
 BC.js is the core implementation of universal Bluetooth JavaScript API.<br/>
 It supports both Bluetooth 4.0 GATT interface in IOS/Android and Bluetooth 2.1 Classical interface in Android.
 
   * Online Bluetooth Javascript API document: http://www.bcsphere.org/portal.php?mod=topic&topicid=3 <br/>
-  * [bleprofiles](https://github.com/bcsphere/bleprofiles) is the BC official open source Bluetooth common profiles library based on BC.js, which can be re-used by applications to accelerate development.
+  * library based on BC.js, which can be re-used by applications to accelerate development.
   * [bcexplorer](https://github.com/bcsphere/bcexplorer) is the open source tool to explore the GATT services/characteristics of Bluetooth Smart devices. It helps debug devices as well as demostrates the Bluetooth Javascript API.
   * [bciBeacon](https://github.com/bcsphere/ibeacon) implements a demo iBeacon as a plugin based on BC.js.
   
@@ -19,12 +19,25 @@ Features
 * Support Bluetooth 4.0 GATT interface in IOS/Android.
 * Support Bluetooth 2.1 rfcomm interface in Android.
 
+#### Beacon / iBeacon 
+* Support Beacon/iBeacon capability in IOS/Android.
+* Support proximity with beacon
+
 #### Bluetooth Common Services Library 
 * Implement Bluetooth 4.0 Standard GATT services. (extending)
 * Integrate various customermized GATT services to access partners' Bluetooth Smart devices. (extending)
 
+#### Offical profile & services implements
+* BC.js implements some of offical profiles and services which defined in Bluetooth Specification(www.bluetooth.org)
+* Profiles include [Find Me](https://github.com/bcsphere/bluetooth/blob/master/www/org.bluetooth.profile/find_me.js)/
+[Proximity](https://github.com/bcsphere/bluetooth/blob/master/www/org.bluetooth.profile/proximity.js)
+* Services include [TX Power](https://github.com/bcsphere/bluetooth/blob/master/www/org.bluetooth.service/tx_power.js)/
+[Link Loss](https://github.com/bcsphere/bluetooth/blob/master/www/org.bluetooth.service/link_loss.js)/
+[Immediate Alert](https://github.com/bcsphere/bluetooth/blob/master/www/org.bluetooth.service/immediate_alert.js)...
+* Find Me example is [here](https://github.com/bcsphere/apps/tree/master/findme), it shows how to use the profiles.
+
 #### Universal Bluetooth Serial Port 
-* Cross-platform implementation of Bluetooth serial port, covering the IOS/Android platform difference when using the [serial port profile](https://github.com/bcsphere/bleprofiles).
+* Cross-platform implementation of Bluetooth serial port, covering the IOS/Android platform difference when using the [serial port profile](https://https://github.com/bcsphere/bluetooth/blob/master/www/org.bluetooth.profile/serial_port.js).
 * Automatic Bluetooth 4.0/2.1 routing to establish appropriate connection, considering both phones and peripheral devices modes.
 
 #### Reuse rich Apache Cordova/PhoneGap Ecosystem

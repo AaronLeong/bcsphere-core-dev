@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html manifest="offline.manifest">
+	<head>
+		<meta charset="utf-8">
+		
+		<title></title>
+		<link rel="stylesheet" href="css/jquery.mobile.min.css" />
+		<script type="text/javascript" charset="utf-8" src="js/jquery-1.7.1.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile.min.js"></script>
+		<script type="text/javascript" src="cordova.js"></script>
+		<script type="text/javascript" src="js/index.js"></script>
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script>
+			$(function(){
+				app.initialize();
+			});
+			
+		</script>
+	</head>
+	<body>
+		<a id="write" href="javascript:void(0)" onclick="app.write()" data-role="button" style="clear:both; text-align:center;">Write!</a>
+	</body>
+</html>
